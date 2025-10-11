@@ -22,7 +22,6 @@ wormJB was inspired by:
 - Fugu17
 - Ballpa1n
 - Cydia Gold
-and other similar projects.
 
 ## Disclaimers
 
