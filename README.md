@@ -13,6 +13,34 @@ wormJB is a jailbreak-like tool for iOS that supports versions 14.0 to 26.1 with
 
 That's it. This is a very simple process. If you mess this process up somehow then it is either a **bug** that you should report, or you are the issue.
 
+## How it Works
+The **pissra1n 2** tool is used, utilizing **liqu1dass**. This is essential for modern semi-rootless jailbreak-like tweaks.
+
+After this, the **semi-rootless environment** will be prepared by the wormJB scripts.
+
+## Q&A
+**Q**: Is wormJB rootless or rootful?
+
+**A**: wormJB is only a **semi-rootless** jailbreak-like tool. This means that while you have access to the root directory, it is not fully accessible, writable, or even readable. This is a catch to how the jailbreak-like method works. On top of that, the root directory is only accessible from the A-Shell app.
+
+---
+
+**Q**: I paid for wormJB and it doesn't work. Is this a scam?
+
+**A**: You were scammed, wormJB is free software.
+
+---
+
+**Q**: Zebra did not install.
+
+**A**: Rerun the shortcut.
+
+---
+
+**Q**: I can't install A-Shell from the App Store. What do I do?
+
+**A**: Then your device cannot have jailbreak-like tweaks.
+
 ## Inspiration
 
 wormJB was inspired by:
@@ -22,6 +50,7 @@ wormJB was inspired by:
 - Fugu17
 - Ballpa1n
 - Cydia Gold
+- hammerJB
 
 ## Disclaimers
 
