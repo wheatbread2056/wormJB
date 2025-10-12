@@ -29,3 +29,5 @@ now that the main script is running, it will show some fake information about a 
 11. install some config profile to get fake zebra (safe)
 
 12. say done and neofetch.
+
+tool ideas: wormjb (prints wormjb info), worm (prints "im worming it"). wormjb sub commands: credits, help, cydia, revert
