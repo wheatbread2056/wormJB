@@ -28,6 +28,7 @@ After this, the **semi-rootless environment** will be prepared by the wormJB scr
 **Q**: Is wormJB rootless or rootful?
 
 **A**: wormJB is only a **semi-rootless** jailbreak-like tool. What semi-rootless means is that you can go to the root directory (/) but you can't really go inside its folders, you can't really read or write in it, so basically you're stuck inside the A-Shell app directory, specifically ~/Documents/ (this is what A-Shell uses as the home directory)
+
 ---
 
 **Q**: wormJB did not install.
