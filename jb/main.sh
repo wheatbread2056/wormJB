@@ -1,5 +1,5 @@
 # note: a shell doesnt need a shebang line
-VERSION="not done 0.1"
+VERSION="not done 0.2"
 
 clear
 cd ~/Documents/wormJB
@@ -26,6 +26,12 @@ cd tools
 mkdir -p ~/Documents/bin
 cp ashellfetch.sh ~/Documents/bin/neofetch
 chmod +x ~/Documents/bin/neofetch
+
+sleep 1
+
+# set up directories
+cd ~/Documents/wormJB/jb
+sh pissra1n.sh
 
 # test neofetch (remove this later)
 neofetch
