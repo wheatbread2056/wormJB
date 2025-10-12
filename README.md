@@ -1,3 +1,9 @@
+# DO NOT USE THIS RIGHT NOW
+
+it is not done. also disclaimer for anyone who thinks this is a real jailbreak: THIS IS NOT A JAILBREAK, IT IS USELESS.
+
+this is just a project i decided to work on cause i was bored
+
 # wormJB
 wormJB is a jailbreak-like tool for iOS that supports versions 14.0 to 26.1 with any device.
 
@@ -5,7 +11,7 @@ wormJB is a jailbreak-like tool for iOS that supports versions 14.0 to 26.1 with
 - an Internet Connection
 - an Apple device running iOS/iPadOS 14.0 or later
 - the [A-Shell App](https://apps.apple.com/us/app/a-shell/id1473805438)
-- the Shortcut (not done yet)
+- the [Shortcut](https://www.icloud.com/shortcuts/9821de092cb140c29a8f38862f4c99fc)
 
 ## Instructions
 1. Download the Shortcut if you haven't already, along with installing A-Shell.
