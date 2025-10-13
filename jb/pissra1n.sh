@@ -1,3 +1,4 @@
+#!/bin/sh
 echo "######################"
 echo "pissra1n version 2.0.0"
 echo "######################"
@@ -8,44 +9,48 @@ echo thanks to Apple, Inc. for the liqu1dass exploit
 
 sleep 1
 echo disabling P1SS
-sleep 0.8
+sleep 1.0
 echo disabling Windows Defender
-sleep 0.7
+sleep 0.9
 echo disabling MacOS defender
-sleep 0.6
+sleep 0.8
 echo disabling Apple defender
-sleep 0.5
+sleep 0.7
 echo disabling avast antivirus
-sleep 0.4
-echo disabling anti-jb in ios
-sleep 0.3
+sleep 0.6
+echo disabling anti-jb features in ios
+sleep 0.5
 echo disabling SystemSecurityDaemon
 sleep 2.5
+echo enabling pissdaem0n
+sleep 0.8
+echo "done with all that."
+sleep 0.4
 
 echo "Setting up semi-rootless environment (stage 1)"
 cd ~/Documents/
-mkdir var
-mkdir usr
-mkdir dev
-mkdir cores
-mkdir System
-mkdir Library
-mkdir Developer
-mkdir Applications
-mkdir etc
-mkdir private
-mkdir sbin
-mkdir tmp
+mkdir -p var
+mkdir -p usr
+mkdir -p dev
+mkdir -p cores
+mkdir -p System
+mkdir -p Library
+mkdir -p Developer
+mkdir -p Applications
+mkdir -p etc
+mkdir -p private
+mkdir -p sbin
+mkdir -p tmp
 
 sleep 3.1
 
 echo "Setting up semi-rootless environment (stage 2)"
 cd var
-mkdir jb
-mkdir pissra1n
-mkdir apple
+mkdir -p jb
+mkdir -p pissra1n
+mkdir -p apple
 cd apple
-mkdir piss
+mkdir -p piss
 
 sleep 2.17381
 

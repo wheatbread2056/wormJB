@@ -1,1 +1,2 @@
-pkg
+#!/bin/sh
+pkg "$@"

@@ -1,11 +1,7 @@
-# DO NOT USE THIS RIGHT NOW
-
-it is not done. also disclaimer for anyone who thinks this is a real jailbreak: THIS IS NOT A JAILBREAK, IT IS USELESS.
-
-this is just a project i decided to work on cause i was bored
-
 # wormJB
 wormJB is a jailbreak-like tool for iOS that supports versions 14.0 to 26.1 with any device.
+
+disclaimer: this is not a jailbreak. this does not exploit anything.
 
 ## Requirements
 - an Internet Connection
