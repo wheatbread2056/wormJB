@@ -59,8 +59,6 @@ case "$1" in
     rm -r jb
     rm -r pissra1n
     rm -r apple
-    cd apple
-    rm -r piss
 
     sleep 3.1
 

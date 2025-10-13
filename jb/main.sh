@@ -1,5 +1,5 @@
 #!/bin/sh
-VERSION="release candidate 3"
+VERSION="release candidate 4"
 
 clear
 cd ~/Documents/wormJB
@@ -10,8 +10,8 @@ sleep 1
 
 VERFILE=~/Documents/.wormjbver
 
-rm $VERFILE
-rm ~/Documents/wormjbver > /dev/null # if the old wormjbver file still exists
+rm -f $VERFILE
+rm -f ~/Documents/wormjbver # if the old wormjbver file still exists
 
 # change version
 if [ -f "$VERFILE" ]; then
@@ -28,6 +28,7 @@ echo "worming it to set up the wormJB..."
 # install neofetch
 cd tools
 mkdir -p ~/Documents/bin
+rm -f neofetch
 cp ashellfetch.sh ~/Documents/bin/neofetch
 chmod +x ~/Documents/bin/neofetch
 
@@ -41,9 +42,9 @@ sleep 0.519571
 
 # remove existing wormjb installed tools
 cd ~/Documents/bin
-rm apt
-rm wormjb
-rm worm
+rm -f apt
+rm -f wormjb
+rm -f worm
 
 # install the tools
 echo Installing wormJB tools
