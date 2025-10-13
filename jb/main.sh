@@ -12,6 +12,7 @@ VERFILE=~/Documents/wormjbver
 
 if [ -f "$VERFILE" ]; then
     echo "wormJB is already installed but i dont feel like figuring out how to see if its a higher or same version, thats too much work. so its just gonna auto reinstall so you should close a-shell ASAP if you dont want it to overwrite the existing wormJB"
+    echo "$VERSION" > "$VERFILE"
 else
     echo "wormJB has not been installed yet. that means it's time to install"
     echo "$VERSION" > "$VERFILE"
