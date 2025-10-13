@@ -18,15 +18,11 @@ now that the main script is running, it will show some fake information about a 
 
 6. install neofetch for A-Shell
 
-7. cd to / by default in A-Shell (gives the illusion of a root filesystem, since A-Shell can look in root for some reason but can't go inside the folders besides some specific ones)
-
 8. make fake jb directories like /var/jb in ~ (since root /var isnt writable or even readable)
 
 9. install wormJB tools (scripts) that report some fake jailbreak information but some might actually be semi useful but probably not
 
 10. "install" apt (also just a script)
-
-11. install some config profile to get fake zebra (safe)
 
 12. say done and neofetch.
 
