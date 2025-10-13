@@ -1,5 +1,5 @@
 #!/bin/sh
-VERSION="release candidate 1"
+VERSION="release candidate 2"
 
 clear
 cd ~/Documents/wormJB
@@ -50,6 +50,8 @@ echo Installing wormJB tools
 cp ~/Documents/wormJB/tools/apt.sh apt
 cp ~/Documents/wormJB/tools/worm.sh worm
 cp ~/Documents/wormJB/tools/wormjb.sh wormjb
+
+sleep 2.14
 
 # when done
 neofetch

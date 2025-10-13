@@ -1,5 +1,5 @@
 #!/bin/sh
-wormjb_version=$(cat ~/Documents/wormjbver 2>/dev/null)
+wormjb_version=$(cat ~/Documents/.wormjbver 2>/dev/null)
 
 case "$1" in
   credits)

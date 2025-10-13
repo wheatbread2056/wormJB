@@ -17,7 +17,7 @@ uptime=$(uptime | awk '{print $3,$4}' | sed 's/,//')
 shell="$SHELL"
 cpu_arch=$(uname -p)
 cpu_model=$(uname -m)
-wormjb_version=$(cat ~/Documents/wormjbver 2>/dev/null)
+wormjb_version=$(cat ~/Documents/.wormjbver 2>/dev/null)
 
 calculate_memory() {
     local meminfo="/tmp/meminfo"

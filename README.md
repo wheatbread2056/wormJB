@@ -1,7 +1,9 @@
 # wormJB
 wormJB is a jailbreak-like tool for iOS that supports versions 14.0 to 26.1 with any device.
 
-disclaimer: this is not a jailbreak. this does not exploit anything.
+wormJB has only been tested on iOS 26.0.1 with the iPhone 15. If any issues arise, you can report an issue.
+
+*disclaimer: this is not a jailbreak, and does not exploit anything in iOS. the project is purely for entertainment and experimental purposes.*
 
 ## Requirements
 - an Internet Connection
@@ -44,14 +46,6 @@ wormJB was inspired by:
 - Ballpa1n
 - hammerJB
 
-## Disclaimers
-
-This project is **for educational and experimental purposes only**.
-wormJB does not actually perform any jailbreak actions, modify system partitions, or bypass security mechanisms.
-Use at your own discretion.
+## Legal Info
 
 iOS is a trademark of Apple, Inc.
-
-## Other Notes
-
-This is NOT a jailbreak! This is also not useful in any way, shape, or form. There is no reason to use this. Why are you using this?
