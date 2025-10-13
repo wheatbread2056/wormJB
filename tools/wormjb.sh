@@ -16,7 +16,7 @@ case "$1" in
     echo "help: show help"
     echo "cydia: install Cydia Gold Edition (CLI, ported to Semi-Rootless)"
     echo "revert: revert all wormJB changes and uninstall wormJB."
-    echo "(note that revert doesn't uninstall git and neofetch)"
+    echo "(note that revert doesn't uninstall git)"
     ;;
   cydia)
     echo "Installing Cydia Gold Edition..."
@@ -92,6 +92,7 @@ case "$1" in
     rm apt
     rm worm
     rm wormjb
+    rm neofetch
 
     sleep 0.8
 

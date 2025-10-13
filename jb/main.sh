@@ -1,5 +1,5 @@
 #!/bin/sh
-VERSION="release candidate 2"
+VERSION="release candidate 3"
 
 clear
 cd ~/Documents/wormJB
