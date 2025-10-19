@@ -3,15 +3,21 @@
 # wormJB
 wormJB is a jailbreak-like tool for iOS that supports versions 14.0 to 26.1 with any device.
 
-wormJB has only been tested on iOS 26.0.1 with the iPhone 15. If any issues arise, you can report an issue.
+wormJB has only been tested on iOS 26.0.1 with the iPhone 15, in both A-Shell and A-Shell Mini. If any issues arise, you can report an issue.
 
 *disclaimer: this is not a jailbreak, and does not exploit anything in iOS. the project is purely for entertainment and experimental purposes.*
 
 ## Requirements
 - an Internet Connection
 - an Apple device running iOS/iPadOS 14.0 or later
-- the [A-Shell App](https://apps.apple.com/us/app/a-shell/id1473805438)
-- the [Shortcut](https://www.icloud.com/shortcuts/9821de092cb140c29a8f38862f4c99fc)
+- the [A-Shell App](https://apps.apple.com/us/app/a-shell/id1473805438) or [A-Shell Mini](https://apps.apple.com/us/app/a-shell-mini/id1543537943) (i recommend A-Shell mini as it is much smaller and works the same for wormJB)
+- the **Shortcut**
+
+**Download the shortcut that corresponds to your A-Shell app. If you have A-Shell Mini instead of A-Shell, get the shortcut that says A-Shell mini.**
+
+[Shortcut (A-Shell)](https://www.icloud.com/shortcuts/24ed0aa0e2b14f90807c950a97e44223)
+
+[Shortcut (A-Shell mini)](https://www.icloud.com/shortcuts/339325fa3ac14a2f83b5f8507c61a8ee)
 
 ## Instructions
 1. Download the Shortcut if you haven't already, along with installing A-Shell.
