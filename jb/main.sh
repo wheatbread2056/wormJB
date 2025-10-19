@@ -1,5 +1,5 @@
 #!/bin/sh
-VERSION="1.0.3"
+VERSION="1.0.4"
 
 clear
 cd ~/Documents/wormJB
@@ -61,6 +61,10 @@ cp ashellfetch.sh ~/Documents/bin/neofetch
 chmod +x ~/Documents/bin/neofetch
 
 sleep 1
+
+echo installing pissra1n...
+chmod +x ~/Documents/wormJB/jb/pissra1n.sh
+sleep 1.111
 
 # set up directories
 cd ~/Documents/wormJB/jb

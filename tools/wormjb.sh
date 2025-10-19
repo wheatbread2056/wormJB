@@ -25,63 +25,7 @@ case "$1" in
     echo "failed: couldn't find cydiagold-semirootless-0.1.15.wormjbextension2"
     ;;
   revert)
-    echo "######################"
-    echo "pissra1n version 2.0.0"
-    echo "######################"
-    echo
-    echo pissra1n, by the pissra1n team.
-    echo thanks to Apple, Inc. for the liqu1dass exploit
-    echo
-    echo STARTING REVERT PROCESS!!!
-    echo
-    sleep 1
-    echo enabling P1SS
-    sleep 1.0
-    echo enabling Windows Defender
-    sleep 0.9
-    echo enabling MacOS defender
-    sleep 0.8
-    echo enabling Apple defender
-    sleep 0.7
-    echo enabling avast antivirus
-    sleep 0.6
-    echo enabling anti-jb features in ios
-    sleep 0.5
-    echo enabling SystemSecurityDaemon
-    sleep 2.5
-    echo disabling pissdaem0n
-    sleep 0.8
-    echo "done with all that."
-    sleep 0.4
-
-    echo "Removing semi-rootless environment (stage 2)"
-    cd ~/Documents/
-    cd var
-    rm -r jb
-    rm -r pissra1n
-    rm -r apple
-
-    sleep 3.1
-
-    echo "Removing semi-rootless environment (stage 1)"
-
-    cd ~/Documents/
-    rm -r var
-    rm -r usr
-    rm -r dev
-    rm -r cores
-    rm -r System
-    rm -r Library
-    rm -r Developer
-    rm -r Applications
-    rm -r etc
-    rm -r private
-    rm -r sbin
-    rm -r tmp
-
-    sleep 2.17381
-
-    echo pissra1n is done.
+    ~/Documents/wormJB/jb/pissra1n.sh uninstall
 
     sleep 0.5
 
