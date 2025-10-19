@@ -23,9 +23,9 @@ The **pissra1n 2** tool is used. This is essential for wormJB.
 After this, the **semi-rootless environment** will be prepared by the wormJB scripts.
 
 ## Q&A
-**Q**: Is wormJB rootless or rootful?
+**Q**: Is wormJB rootful?
 
-**A**: wormJB is only a **semi-rootless** jailbreak-like tool. What semi-rootless means is that you can go to the root directory (/) but you can't really go inside its folders, you can't really read or write in it, so basically you're stuck inside the A-Shell app directory, specifically ~/Documents/ (this is what A-Shell uses as the home directory)
+**A**: wormJB is only a **semi-rootless** jailbreak-like tool. This means that you are stuck inside A-Shell for filesystem operations, and cannot access / but rather a simulation of it (directories copied) inside your user directory: ~/Documents
 
 ---
 
@@ -42,10 +42,12 @@ After this, the **semi-rootless environment** will be prepared by the wormJB scr
 ## Inspiration
 
 wormJB was inspired by:
-- Dopamineek
+- [pissra1n](https://github.com/bomberfish/pissra1n)
 - Ballpa1n
 - hammerJB
 
 ## Legal Info
 
 iOS is a trademark of Apple, Inc.
+
+The pissra1n scripts included in this repository are not at all affiliated or related with a real project using the same name: https://github.com/bomberfish/pissra1n
