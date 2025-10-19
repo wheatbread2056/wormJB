@@ -43,8 +43,8 @@ After this, the **semi-rootless environment** will be prepared by the wormJB scr
 
 wormJB was inspired by:
 - [pissra1n](https://github.com/bomberfish/pissra1n)
-- Ballpa1n
-- hammerJB
+- [Ballpa1n](https://github.com/llsc12/ballpa1n)
+- [hammerJB](https://github.com/WhitetailAni/hammerJB)
 
 ## Legal Info
 
