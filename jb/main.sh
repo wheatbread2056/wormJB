@@ -1,5 +1,5 @@
 #!/bin/sh
-VERSION="1.1.0-beta1"
+VERSION="1.1.0-beta2"
 
 clear
 cd ~/Documents/wormJB
@@ -23,11 +23,11 @@ if [ -f "$VERFILE" ]; then
     echo "$VERSION" > "$VERFILE"
     echo "wormJB version data put into $VERFILE."
     sleep 1
-    echo "finished reinitializing wormhook-loader"
+    echo "finished reinitializing wormstrap-loader"
     sleep 1.8
-    echo "finished reinitializing wormhook"
+    echo "finished reinitializing wormstrap"
     sleep 0.1
-    echo "worming the hook"
+    echo "worming the thing"
     sleep 0.21
     echo "injecting wormstrap-$VERSION"
     sleep 0.31
@@ -37,11 +37,11 @@ else
     echo "$VERSION" > "$VERFILE"
     echo "wormJB version data put into $VERFILE."
     sleep 1
-    echo "initializing wormhook-loader"
+    echo "initializing wormstrap-loader"
     sleep 2.4
-    echo "finished initializing wormhook"
+    echo "finished initializing wormstrap"
     sleep 0.1
-    echo "worming the hook"
+    echo "worming the thing"
     sleep 0.31
     echo "injecting wormstrap-$VERSION"
     sleep 0.44
@@ -80,7 +80,7 @@ rm -f worm
 
 # install hookworm
 echo Installing the hookworm tweak loader
-sh loader/hookworm.sh install
+sh ~/Documents/wormJB/jb/loader/hookworm.sh install
 sleep 1.1231
 
 # install the tools
