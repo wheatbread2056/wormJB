@@ -1,5 +1,5 @@
 #!/bin/sh
-VERSION="1.1.0-beta4"
+VERSION="1.1.0-beta5"
 
 clear
 cd ~/Documents/wormJB
@@ -11,10 +11,10 @@ sleep 1
 rm -f ~/Documents/wormjbver # if the old wormjbver file still exists
 
 VERFILE=~/Documents/.wormjbver
-INSTALLEDVER=$(cat "$VERFILE")
 
 # change version
 if [ -f "$VERFILE" ]; then
+    INSTALLEDVER=$(cat "$VERFILE")
     echo "wormJB is already installed (version $INSTALLEDVER)."
     echo "reinstalling / updating wormJB."
     echo "###############################"
