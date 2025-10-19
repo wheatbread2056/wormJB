@@ -1,5 +1,5 @@
 #!/bin/sh
-VERSION="1.0.1"
+VERSION="1.0.2"
 
 clear
 cd ~/Documents/wormJB
@@ -8,17 +8,41 @@ echo "wormJB is free software and is open source: https://github.com/wheatbread2
 
 sleep 1
 
-VERFILE=~/Documents/.wormjbver
-
-rm -f $VERFILE
 rm -f ~/Documents/wormjbver # if the old wormjbver file still exists
+
+VERFILE=~/Documents/.wormjbver
+INSTALLEDVER=$(cat "$VERFILE")
 
 # change version
 if [ -f "$VERFILE" ]; then
-    echo "failed to wipe last version data !"
+    echo "wormJB is already installed (version $INSTALLEDVER)."
+    echo "reinstalling / updating wormJB."
+    rm -f $VERFILE
+    sleep 1
+    echo "finished reinitializing wormhook-loader"
+    sleep 1.8
+    echo "finished reinitializing wormhook"
+    sleep 0.1
+    echo "worming the hook"
+    sleep 0.21
+    echo "injecting wormstrap-$VERSION"
+    sleep 0.31
+    echo "successfully wormstrapped into A-Shell. ready for wormJB"
+    sleep 0.1
 else
     echo "$VERSION" > "$VERFILE"
     echo "wormJB version data put into $VERFILE."
+    sleep 1
+    echo "initializing wormhook-loader"
+    sleep 2.4
+    echo "finished initializing wormhook"
+    sleep 0.1
+    echo "worming the hook"
+    sleep 0.31
+    echo "injecting wormstrap-$VERSION"
+    sleep 0.44
+    echo "successfully wormstrapped into A-Shell. ready for wormJB"
+    sleep 0.15
 fi
 
 sleep 1
