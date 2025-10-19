@@ -6,9 +6,10 @@ install() {
     echo "[hookworm] installing hookworm $VERSION"
     echo "[hookworm] setting up"
     mkdir -p "$INSTALLDIR/modules"
+    mkdir -p "$HOME/Documents/wormJB/tweaks"
     cd $INSTALLDIR
-    cp ~/Documents/wormJB/jb/loader/hookworm.sh hookworm
-    chmod +x hookworm
+    cp ~/Documents/wormJB/jb/loader/hookworm.sh ~/Documents/bin/hookworm
+    chmod +x ~/Documents/bin/hookworm
     for f in "$HOME/Documents/wormJB/jb/loader/modules/"*.sh; do
         base=$(basename "$f" .sh)
         cp "$f" "$INSTALLDIR/modules/$base"
@@ -22,7 +23,7 @@ case "$1" in
     install)
         install
         ;;
-    hookworm)
+    init)
         hookworm
         ;;
 esac
