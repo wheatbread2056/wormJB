@@ -5,7 +5,8 @@ case "$1" in
   credits)
     echo "wormJB version $wormjb_version"
     echo "made by: wheatbread2056"
-    echo "pissra1n 2 by the pissra1n team"
+    echo "pissra1n 2 by the pissra1n team (wheatbread2056)"
+    echo "pissra1n 2 is NOT associated with pissra1n by bomberfish."
     echo "liqu1dass by Apple, Inc."
     echo "ashellfetch originally by GrandDiJay"
     echo "wormJB github: https://github.com/wheatbread2056/wormJB"

@@ -1,10 +1,10 @@
 #!/bin/sh
-VERSION="1.0.0"
+VERSION="1.0.1"
 
 clear
 cd ~/Documents/wormJB
 echo "wormJB version $VERSION."
-echo "wormJB is free software, if you paid for this software then you have been scammed."
+echo "wormJB is free software and is open source: https://github.com/wheatbread2056/wormJB"
 
 sleep 1
 
