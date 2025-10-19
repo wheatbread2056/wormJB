@@ -1,5 +1,5 @@
 #!/bin/sh
-VERSION="2.0.1"
+VERSION="2.0.2"
 # note VERSION has to be 5 letters
 echo "######################"
 echo "pissra1n version $VERSION"
@@ -9,8 +9,6 @@ echo thanks to Apple, Inc. for the liqu1dass exploit
 
 case "$1" in
     uninstall)
-        echo pissra1n, by the pissra1n team.
-        echo thanks to Apple, Inc. for the liqu1dass exploit
         echo
         echo STARTING REVERT PROCESS!!!
         echo
