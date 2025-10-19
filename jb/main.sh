@@ -1,5 +1,5 @@
 #!/bin/sh
-VERSION="1.0.2"
+VERSION="1.0.3"
 
 clear
 cd ~/Documents/wormJB
@@ -17,7 +17,11 @@ INSTALLEDVER=$(cat "$VERFILE")
 if [ -f "$VERFILE" ]; then
     echo "wormJB is already installed (version $INSTALLEDVER)."
     echo "reinstalling / updating wormJB."
+    echo "###############################"
+    sleep 0.5
     rm -f $VERFILE
+    echo "$VERSION" > "$VERFILE"
+    echo "wormJB version data put into $VERFILE."
     sleep 1
     echo "finished reinitializing wormhook-loader"
     sleep 1.8
