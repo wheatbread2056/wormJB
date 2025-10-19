@@ -1,5 +1,5 @@
 #!/bin/sh
-VERSION="1.0.5"
+VERSION="1.1.0-beta1"
 
 clear
 cd ~/Documents/wormJB
@@ -77,6 +77,11 @@ cd ~/Documents/bin
 rm -f apt
 rm -f wormjb
 rm -f worm
+
+# install hookworm
+echo Installing the hookworm tweak loader
+sh loader/hookworm.sh install
+sleep 1.1231
 
 # install the tools
 echo Installing wormJB tools
