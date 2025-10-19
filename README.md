@@ -29,7 +29,7 @@ The **pissra1n 2** tool is used. This is essential for wormJB.
 
 After this, the **semi-rootless environment** will be prepared by the wormJB scripts.
 
-## Q&A
+## FAQ
 **Q**: Is wormJB rootful?
 
 **A**: wormJB is only a **semi-rootless** jailbreak-like tool. This means that you are stuck inside A-Shell for filesystem operations, and cannot access / but rather a simulation of it (directories copied) inside your user directory: ~/Documents
