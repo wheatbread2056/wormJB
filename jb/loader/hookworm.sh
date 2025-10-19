@@ -1,6 +1,6 @@
 #!/bin/sh
 # hookworm the tweak loader
-VERSION="0.0.1"
+VERSION="0.0.3"
 INSTALLDIR="$HOME/Documents/wormJB/hookworm"
 install() {
     echo "[hookworm] installing hookworm $VERSION"
@@ -12,8 +12,8 @@ install() {
     chmod +x ~/Documents/bin/hookworm
     for f in "$HOME/Documents/wormJB/jb/loader/modules/"*.sh; do
         base=$(basename "$f" .sh)
-        cp "$f" "$INSTALLDIR/modules/$base"
-        chmod +x "$INSTALLDIR/modules/$base"
+        cp "$f" "$INSTALLDIR/$base"
+        chmod +x "$INSTALLDIR/$base"
     done
 }
 hookworm() {

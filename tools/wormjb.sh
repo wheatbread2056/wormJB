@@ -42,6 +42,8 @@ case "$1" in
     echo "[wormJB] uninstalling wormJB"
     cd ~/Documents
     rm -rf wormJB
+    rm -f .wormjbver
+    rm -f wormjbver
     echo "done uninstalling."
 
     ;;

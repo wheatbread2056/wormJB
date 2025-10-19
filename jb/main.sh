@@ -1,5 +1,5 @@
 #!/bin/sh
-VERSION="1.1.0-beta3"
+VERSION="1.1.0-beta4"
 
 clear
 cd ~/Documents/wormJB
