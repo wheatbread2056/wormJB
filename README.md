@@ -1,4 +1,4 @@
-![wormjb banner](assets/womrjbbanner.png)
+![wormjb banner](assets/wormjbbanner.png)
 
 wormJB is a jailbreak-like tool for iOS that supports versions 14.0 to 26.1 with any device.
 
