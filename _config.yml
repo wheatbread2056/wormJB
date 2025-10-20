@@ -1,0 +1,5 @@
+# GitHub Pages Configuration
+theme: jekyll-theme-cayman
+title: wormJB
+description: A jailbreak-like tool for iOS 14.0 to 26.1
+show_downloads: true
