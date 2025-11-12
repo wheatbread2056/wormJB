@@ -1,5 +1,5 @@
 #!/bin/sh
-VERSION="1.1.0-beta6"
+VERSION="1.1.0-beta7"
 
 clear
 cd ~/Documents/wormJB
@@ -95,6 +95,15 @@ cp ~/Documents/wormJB/tools/wormjb.sh wormjb
 sleep 2.14
 
 # when done
+cd ~/Documents/wormJB
+read -p "install wormjb app? (optional) (y/n): " answer
+case "$answer" in
+  [Yy]*) open jb/WormJB.mobileconfig ;;
+  [Nn]*) echo ok ;;
+  *) echo "???" ;;
+esac
+
+
 neofetch
 echo
 echo wormJB is done installing!
