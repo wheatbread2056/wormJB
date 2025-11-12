@@ -14,6 +14,7 @@
       --ios-bg: #ffffff;
       --ios-text-gray: #555;
     }
+    /* Dark variables are applied via early bootstrap/applyTheme; avoid CSS overrides leaking into light mode */
     html, body {
       margin: 0; padding: 0;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -31,7 +32,7 @@
     }
     .version {
       position: fixed; top: 56px; width: 100%; text-align: center;
-      font-size: 0.8rem; color: #666; background: white; padding: 0.3rem 0;
+      font-size: 0.8rem; color: var(--ios-text-gray); background: white; padding: 0.3rem 0;
       z-index: 9;
     }
     main {
@@ -100,23 +101,55 @@
     .tab {
       flex: 1; display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      color: #8e8e93; font-size: 0.7rem; cursor: pointer;
+      color: var(--ios-text-gray); font-size: 0.7rem; cursor: pointer;
       user-select: none;
     }
     .tab.active { color: var(--ios-blue); }
-    svg { width: 22px; height: 22px; margin-bottom: 2px; }
+  svg { width: 22px; height: 22px; margin-bottom: 2px; }
+
+    /* Tweak list layout stability */
+    .tweak-left {
+      display: flex; flex-direction: column; flex: 1 1 auto; min-width: 0; /* allow ellipsis */
+    }
+    .tweak-title-row { display:flex; align-items:center; gap:.5rem; min-width:0; }
+    .tweak-name { font-size:1rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .tweak-id { color: var(--ios-text-gray); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:40vw; }
+  .tweak-desc { color: var(--ios-text-gray); margin-top:0.25rem; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; line-clamp:2; -webkit-box-orient:vertical; }
+    .tweak-meta { color: var(--ios-text-gray); font-size:0.85rem; margin-top:0.35rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+    /* Header username color uses variable for proper dark/light contrast */
+    #headerUsername { color: var(--ios-text-gray); }
+    .tweak-right { display:flex; align-items:center; gap:.5rem; flex: 0 0 auto; }
 
     /* When forcing Apple-like font (Inter) */
     html.force-apple-font, html.force-apple-font body {
       font-family: 'Inter', -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     }
   </style>
+  <!-- Early theme bootstrap to avoid flash and ensure variables are set before paint -->
+  <script>
+    (function(){
+      try {
+        var mode = localStorage.getItem('themeMode') || 'system';
+        var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var dark = (mode === 'dark') || (mode === 'system' && prefersDark);
+        if (dark) document.documentElement.classList.add('dark'); else document.documentElement.classList.remove('dark');
+        var customBg = localStorage.getItem('customBg') || '';
+        var bg = customBg || (dark ? '#0b0b0d' : '#ffffff');
+        var border = dark ? '#2a2d34' : '#c6c6c8';
+        var textGray = dark ? '#a1a1aa' : '#555';
+        document.documentElement.style.setProperty('--ios-bg', bg);
+        document.documentElement.style.setProperty('--ios-border', border);
+        document.documentElement.style.setProperty('--ios-text-gray', textGray);
+      } catch(e) {}
+    })();
+  </script>
 </head>
 <body>
   <header style="display:flex; align-items:center; justify-content:space-between; padding:0 1rem;">
     <div style="font-weight:600; font-size:1.2rem; text-align:left;">WormJB</div>
     <div id="headerProfileWrap" style="display:flex; align-items:center; gap:.5rem;">
-      <span id="headerUsername" style="color:#666; font-size:0.95rem;">User Name</span>
+  <span id="headerUsername" style="color: var(--ios-text-gray); font-size:0.95rem;">WormJB User</span>
       <!-- Profile button/icon. In Icon Mode this will be shown as an unstyled icon button; in Button Mode it will have .ios-button styling and include the username label inside the button -->
       <button id="profileBtn" class="ios-button" style="padding:0.3rem 0.6rem; display:flex; align-items:center; gap:.5rem;">
         <img id="profileIcon" src="assets/wormjbicon.png" alt="icon" style="width:20px; height:20px; border-radius:4px;" />
@@ -124,7 +157,7 @@
       </button>
     </div>
   </header>
-  <div class="version">app version 0.2.3</div>
+  <div class="version">app version 0.3.1</div>
 
   <main>
     <section id="home" class="active">
@@ -159,20 +192,24 @@
             <button class="ios-button" id="showScriptBtn" style="width:100%;">Show Script</button>
           </div>
           <div class="ios-list-item" style="padding:.6rem;">
+            <button class="ios-button" id="openTerminalBtn" style="width:100%;">Open Terminal (A-Shell)</button>
+          </div>
+          <div class="ios-list-item" style="padding:.6rem;">
             <button class="ios-button" id="mysteryBtn" style="width:100%;">Do Nothing</button>
           </div>
         </div>
 
         <div style="margin-top:.75rem; display:flex; gap:.5rem; align-items:center;">
           <button class="ios-button" id="audioToggleBtn">Play Looping Audio</button>
-          <span style="color:var(--ios-text-gray); font-size:0.9rem;">Looping: <strong id="audioState">off</strong></span>
+          <span style="color: var(--ios-text-gray); font-size:0.9rem;">Looping: <strong id="audioState">off</strong></span>
         </div>
       </div>
     </section>
 
     <section id="tweaks">
-      <div style="display:flex; justify-content:flex-end; margin-bottom:.5rem;">
-        <button id="addTweakBtn" class="ios-button" style="display:none;">Add Tweak</button>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:.5rem; gap:.5rem;">
+  <button id="browserBtn" class="ios-button">Browser</button>
+  <button id="addTweakBtn" class="ios-button">Add Tweak</button>
       </div>
       <div id="tweak-container" class="ios-list" style="padding:0;">
         <!-- Tweaks will be rendered here by JS -->
@@ -196,16 +233,35 @@
           <input id="tweakDate" class="ios-input" />
           <label>Background Color</label>
           <input id="tweakBg" class="ios-input" placeholder="#ffffff" />
+          <hr style="border:none; border-top:1px solid var(--ios-border); margin:.75rem 0;" />
+          <label>onEnable (JS code)</label>
+          <textarea id="tweakOnEnable" class="ios-input" style="min-height:72px"></textarea>
+          <label>Enable Confirmation Prompt</label>
+          <input id="tweakEnablePrompt" class="ios-input" placeholder="Are you sure you want to enable?" />
+          <label>Disable Confirmation Prompt</label>
+          <input id="tweakDisablePrompt" class="ios-input" placeholder="Are you sure you want to disable?" />
         </div>
-        <div style="display:flex; gap:.5rem; margin-top: .75rem; justify-content:center;">
+        <div style="display:flex; gap:.5rem; margin-top: .75rem; justify-content:center; flex-wrap:wrap;">
           <button class="ios-button" id="saveTweakBtn">Save</button>
+          <button class="ios-button danger" id="deleteTweakBtn">Delete</button>
           <button class="ios-button" onclick="hideAlert()">Cancel</button>
         </div>
       </div>
     </section>
 
-    <!-- Profile panel (not a tab) -->
-    <section id="profilePanel" style="display:none;">
+    <!-- Tweak Browser page -->
+    <section id="tweakBrowser">
+      <div class="ios-card">
+        <h3>Tweak Browser</h3>
+        <div class="ios-list" id="repoList" style="padding:0;"></div>
+        <div style="display:flex; justify-content:center; gap:.5rem; margin-top:.75rem;">
+          <button class="ios-button" id="backFromBrowserBtn">Back</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Profile page (hidden until opened) -->
+    <section id="profile">
       <div class="ios-card">
         <h3>Profile</h3>
         <div class="ios-list" style="padding:1rem;">
@@ -221,8 +277,9 @@
                 <label style="display:flex; gap:.4rem; align-items:center;"><input type="radio" name="profileMode" value="icon" id="modeIcon"> Icon Mode</label>
                 <label style="display:flex; gap:.4rem; align-items:center;"><input type="radio" name="profileMode" value="button" id="modeButton"> Button Mode</label>
               </div>
-              <label>Profile Icon URL</label>
-              <input id="profileIconUrl" class="ios-input" />
+              <label>Profile Icon Image</label>
+              <input id="profileIconFile" type="file" accept="image/*" class="ios-input" style="padding:.4rem;" />
+              <small style="color: var(--ios-text-gray);">Image stays local in your browser. Nothing is uploaded.</small>
             </div>
           </div>
           <div style="display:flex; gap:.5rem; justify-content:center; margin-top:.5rem;">
@@ -254,6 +311,41 @@
           </div>
         </div>
       </div>
+      <div class="ios-card">
+        <h3>Appearance</h3>
+        <div class="ios-list">
+          <div class="ios-list-item">
+            <span>Theme</span>
+            <select id="themeModeSelect" class="ios-input" style="width:auto;">
+              <option value="system">System</option>
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+            </select>
+          </div>
+          <div class="ios-list-item">
+            <span>Custom Background</span>
+            <input type="color" id="customBgColor" class="ios-input" style="width:64px; padding:0;">
+          </div>
+          <div class="ios-list-item">
+            <span>Apple-like Font</span>
+            <label class="ios-switch"><input type="checkbox" id="themeFontToggle"><span class="slider"></span></label>
+          </div>
+        </div>
+      </div>
+      <div class="ios-card">
+        <h3>System Info</h3>
+        <div class="ios-list" id="sysInfo" style="padding:1rem; font-family:monospace; font-size:0.9rem;"></div>
+      </div>
+      <div class="ios-card">
+        <h3>Credits</h3>
+        <div class="ios-list" style="padding:1rem; line-height:1.5;">
+          <div><strong>Founder:</strong> wheatbread2056 aka brainworm</div>
+          <div><strong>Lead Developer:</strong> GPT-5 by OpenAI</div>
+          <div><strong>Developer:</strong> wheatbread2056</div>
+          <div><strong>Inspiration:</strong> cydia gold edition team</div>
+          <div><strong>License:</strong> No license because nobody needs licenses.</div>
+        </div>
+      </div>
     </section>
 
     <section id="devsettings">
@@ -276,8 +368,13 @@
             </label>
           </div>
         </div>
-        <div style="margin-top: 1rem; display: flex; gap: .75rem;">
+        <div style="margin-top: 1rem; display: flex; gap: .75rem; flex-wrap:wrap;">
           <button class="ios-button danger" onclick="clearAppData()">Clear App Data & Reload</button>
+          <button class="ios-button" id="disableDevBtn">Disable Dev Mode</button>
+          <button class="ios-button" id="reloadAppBtn">Reload App</button>
+          <button class="ios-button" id="exportDataBtn">Export Data (.wormdata)</button>
+          <input id="importDataInput" type="file" accept=".wormdata,application/json" style="display:none;" />
+          <button class="ios-button" id="importDataBtn">Import Data (.wormdata)</button>
         </div>
       </div>
     </section>
@@ -409,7 +506,7 @@
       return [
         { id: 'tweak.wormjb.hookworm', name: 'Hookworm', description: 'The WormJB tweak loader', author: 'wormjb', version: '1.0', date: '2025-11-11', bg: '#f7b2f0', enabled: true },
         { id: 'tweak.pissrain.respring', name: 'Respring Support', description: 'Respring support for wormJB', author: 'Pissra1n tweak devs', version: '0.3.1', date: '2025-06-12', bg: '#b9f7b2', enabled: true },
-        { id: 'app.sileo.demo', name: 'Sileo Demo', description: 'The installation of Sileo Demo is not yet supported through wormJB (this is a placeholder)', version: 'NOT SUPPORTED', author: 'Sileo Team', date: '1970-01-01', bg: '#f7b2b2', enabled: false }
+        { id: 'app.sileo.demo', name: 'Sileo Demo', description: 'Sileo Demo ipa installer', version: '0.8b11', author: 'Sileo Team', date: '2025-10-30', bg: '#9fe8f2', enabled: false, onEnable: "window.open('https://raw.githubusercontent.com/wheatbread2056/wormjbrepo/main/Sileo_Demo_0.8b11.ipa', '_blank');" }
       ];
     }
 
@@ -436,28 +533,24 @@
         item.style.flexDirection = 'row';
         item.style.alignItems = 'center';
         item.style.justifyContent = 'space-between';
-        item.style.background = t.bg || 'white';
+        item.style.background = resolveTweakBg(t.bg || 'white');
         item.style.borderBottom = '1px solid var(--ios-border)';
         item.style.padding = '0.75rem';
 
         const left = document.createElement('div');
-        left.style.display = 'flex';
-        left.style.flexDirection = 'column';
-        left.style.flex = '1';
+        left.className = 'tweak-left';
         left.style.marginRight = '0.75rem';
         left.innerHTML = `
-          <div style="display:flex; align-items:center; gap:.5rem;">
-            <strong style="font-size:1rem">${escapeHtml(t.name)}</strong>
-            <small style="color:#666">${escapeHtml(t.id)}</small>
+          <div class="tweak-title-row">
+            <strong class="tweak-name">${escapeHtml(t.name)}</strong>
+            <small class="tweak-id">${escapeHtml(t.id)}</small>
           </div>
-          <div style="color:#444; margin-top:0.25rem;">${escapeHtml(t.description)}</div>
-          <div style="color:#666; font-size:0.85rem; margin-top:0.35rem;">By ${escapeHtml(t.author)} • v${escapeHtml(t.version)} • ${escapeHtml(t.date)}</div>
+          <div class="tweak-desc">${escapeHtml(t.description)}</div>
+          <div class="tweak-meta">By ${escapeHtml(t.author)} • v${escapeHtml(t.version)} • ${escapeHtml(t.date)}</div>
         `;
 
-        const right = document.createElement('div');
-        right.style.display = 'flex';
-        right.style.alignItems = 'center';
-        right.style.gap = '0.5rem';
+  const right = document.createElement('div');
+  right.className = 'tweak-right';
 
         const label = document.createElement('label');
         label.className = 'ios-switch';
@@ -471,8 +564,28 @@
 
         checkbox.addEventListener('change', () => {
           const ts = loadTweaks();
-          ts[idx].enabled = checkbox.checked;
+          const tw = ts[idx];
+          const goingEnabled = checkbox.checked;
+          let proceed = true;
+          const msg = goingEnabled ? tw.enableConfirmationPrompt : tw.disableConfirmationPrompt;
+          if (msg && typeof msg === 'string' && msg.trim()) {
+            proceed = confirm(msg);
+          }
+          if (!proceed) {
+            checkbox.checked = !goingEnabled;
+            return;
+          }
+          tw.enabled = goingEnabled;
           saveTweaks(ts);
+          if (goingEnabled && tw.onEnable && tw.onEnable.trim()) {
+            try {
+              // Run in isolated function scope
+              new Function(tw.onEnable)();
+            } catch (e) {
+              console.error('onEnable error:', e);
+              showAlert('onEnable error: ' + (e && e.message ? e.message : e));
+            }
+          }
         });
 
         right.appendChild(label);
@@ -511,6 +624,9 @@
       document.getElementById('tweakVersion').value = t.version || '';
       document.getElementById('tweakDate').value = t.date || '';
       document.getElementById('tweakBg').value = t.bg || '';
+      document.getElementById('tweakOnEnable').value = t.onEnable || '';
+      document.getElementById('tweakEnablePrompt').value = t.enableConfirmationPrompt || '';
+      document.getElementById('tweakDisablePrompt').value = t.disableConfirmationPrompt || '';
       const modal = document.getElementById('tweakModal');
       modal.style.display = 'block';
     }
@@ -526,9 +642,23 @@
         version: document.getElementById('tweakVersion').value,
         date: document.getElementById('tweakDate').value,
         bg: document.getElementById('tweakBg').value,
-        enabled: tweaks[currentEditIndex].enabled
+        enabled: tweaks[currentEditIndex].enabled,
+        onEnable: document.getElementById('tweakOnEnable').value,
+        enableConfirmationPrompt: document.getElementById('tweakEnablePrompt').value,
+        disableConfirmationPrompt: document.getElementById('tweakDisablePrompt').value
       };
       saveTweaks(tweaks);
+      hideAlert();
+      renderTweaks();
+    });
+
+    const deleteBtn = document.getElementById('deleteTweakBtn');
+    if (deleteBtn) deleteBtn.addEventListener('click', () => {
+      const tweaks = loadTweaks();
+      if (currentEditIndex === null) return hideAlert();
+      tweaks.splice(currentEditIndex, 1);
+      saveTweaks(tweaks);
+      currentEditIndex = null;
       hideAlert();
       renderTweaks();
     });
@@ -542,9 +672,9 @@
       if (alertBox) alertBox.style.display = 'none';
     }
 
-    // Show alert remains same but ensure modal can be reused
-    // render initially
-    renderTweaks();
+  // Show alert remains same but ensure modal can be reused
+  // render initially
+  renderTweaks();
 
     // ---------- Profile management and Add Tweak ----------
     const PROFILE_KEY = 'wormjb_profile_v1';
@@ -557,7 +687,7 @@
 
     function applyProfileToHeader() {
       const p = loadProfile();
-      const name = p.username || 'User Name';
+  const name = p.username || 'WormJB User';
       const full = p.fullname || '';
       const icon = p.icon || 'assets/wormjbicon.png';
       const mode = p.displayMode || 'icon';
@@ -606,6 +736,9 @@
       if (mode === 'button') {
         // Button Mode: hide left username, style the profile as a button with icon + username inside
         if (headerUsernameEl) headerUsernameEl.style.display = 'none';
+        // Clear any icon-mode inline styles that could suppress button look
+        profileBtn.style.background = '';
+        profileBtn.style.border = '';
         profileBtn.classList.add('ios-button');
         profileBtn.style.padding = '0.3rem 0.6rem';
         profileBtnLabel.style.display = 'inline';
@@ -628,16 +761,12 @@
     }
 
     document.getElementById('profileBtn').addEventListener('click', () => {
-      // show profile panel (hide others)
-      document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
-      document.getElementById('profilePanel').style.display = 'block';
-      // ensure header buttons aren't considered active tab
+      // Open real Profile page as a section/tab
+      switchTab('profile');
       applyProfileToHeader();
     });
 
     document.getElementById('closeProfileBtn').addEventListener('click', () => {
-      document.getElementById('profilePanel').style.display = 'none';
-      // re-open home
       switchTab('home');
     });
 
@@ -646,7 +775,7 @@
       const p = {
         username: document.getElementById('profileUsername').value,
         fullname: document.getElementById('profileFullname').value,
-        icon: document.getElementById('profileIconUrl').value,
+        icon: (loadProfile().icon) || 'assets/wormjbicon.png',
         displayMode: mode
       };
       saveProfile(p);
@@ -660,15 +789,9 @@
     if (modeIconRadio) modeIconRadio.addEventListener('change', () => { if (modeIconRadio.checked) renderProfileDisplayMode('icon'); });
     if (modeButtonRadio) modeButtonRadio.addEventListener('change', () => { if (modeButtonRadio.checked) renderProfileDisplayMode('button'); });
 
-    // Show Add Tweak button when devUnlocked
+    // Dev UI updates that depend on devUnlocked (no longer hide Add Tweak)
     function updateDevUI() {
-      const addBtn = document.getElementById('addTweakBtn');
-      if (!addBtn) return;
-      if (localStorage.getItem('devUnlocked') === 'true') {
-        addBtn.style.display = 'inline-block';
-      } else {
-        addBtn.style.display = 'none';
-      }
+      // currently nothing to toggle besides dev-only content in tweaks (renderTweaks handles that)
     }
 
     document.getElementById('addTweakBtn').addEventListener('click', () => {
@@ -680,6 +803,237 @@
       // open editor for the new tweak (index 0)
       openTweakEditor(0);
     });
+
+    // Browser data (25 local tweaks) with stable, readable IDs
+    function slugifyName(n){
+      return String(n).toLowerCase().replace(/[^a-z0-9]+/g,'').trim();
+    }
+    const REPO_NAMES = [
+      'AeroDock','ClearBadge','StatusFlex','NightOwl','QuickSettings','LiveBattery','SnapGrid','SilentTap','AppLocker','UIRounder','EdgeSwipe','HaptiTune','LockGlyph','ScreenDimmer','IconWeaver','TintKit','MusicBar','PopupKill','ReachPlus','QuietHours','ShadowLess','FolderArt','HUDLite','Springy','BlurBoost'
+    ];
+    const REPO_DESCS = [
+      'Sleek dock transparency for Home Screen.',
+      'Clear badges with a pull gesture.',
+      'Customize status bar elements.',
+      'True system-wide dark enhancement.',
+      'Fast toggles in Control Center.',
+      'Live battery ring on icons.',
+      'Snap icons to a neat grid.',
+      'Silence camera shutter with a tap.',
+      'Passcode protect chosen apps.',
+      'Round UI corners system-wide.',
+      'Gesture from edges to switch apps.',
+      'Fine-tune haptics feedback.',
+      'Animated lock glyph on unlock.',
+      'Auto-dim screen intelligently.',
+      'Weave custom icon overlays.',
+      'Global tint color control.',
+      'Compact music bar on Home.',
+      'Auto-close annoying popups.',
+      'Extended reachability options.',
+      'Schedule silence times.',
+      'Remove icon drop-shadows.',
+      'Custom images for folders.',
+      'Minimal volume HUD.',
+      'Bouncy spring animations.',
+      'Sharper blur performance.'
+    ];
+    const REPO_AUTHORS = ['azuki','mara','luke','nero','olive','finn','kai','zoe','ian','xeno','vera','noah','gale','ivy','sol','tori','milo','aria','rhett','yuna','zane','dina','quinn','brea','lex'];
+    const REPO_BGS = ['#eef7ff','#fef3c7','#f3f4f6','#1118270d','#ecfccb','#f5f3ff','#e0f2fe','#fef2f2','#f3e8ff','#f0fdf4','#fff7ed','#f1f5f9','#fef9c3','#fafafa','#ffe4e6','#fefce8','#eff6ff','#f0f9ff','#f7fee7','#f8fafc','#f5f5f5','#faf5ff','#f0fdfa','#fff1f2','#f1f0ff'];
+    const DEFAULT_REPO = Array.from({length: REPO_NAMES.length}).map((_,i)=>({
+      id: `tweak.${slugifyName(REPO_NAMES[i])}`,
+      name: REPO_NAMES[i],
+      description: REPO_DESCS[i],
+      author: REPO_AUTHORS[i],
+      version: '1.0.0',
+      date: '2025-11-12',
+      bg: REPO_BGS[i]
+    }));
+
+    const repoList = document.getElementById('repoList');
+    function renderRepo() {
+      if (!repoList) return;
+      repoList.innerHTML = '';
+      DEFAULT_REPO.forEach((t) => {
+        const row = document.createElement('div');
+        row.className = 'ios-list-item';
+        row.style.alignItems = 'center';
+        row.style.justifyContent = 'space-between';
+        row.style.background = resolveTweakBg(t.bg || 'white');
+        const left = document.createElement('div');
+        left.className = 'tweak-left';
+        left.innerHTML = `
+          <div class="tweak-title-row"><strong class="tweak-name">${escapeHtml(t.name)}</strong><small class="tweak-id">${escapeHtml(t.id)}</small></div>
+          <div class="tweak-desc">${escapeHtml(t.description)}</div>
+          <div class="tweak-meta">By ${escapeHtml(t.author)} • v${escapeHtml(t.version)} • ${escapeHtml(t.date)}</div>
+        `;
+        const right = document.createElement('div');
+        right.className = 'tweak-right';
+        const installBtn = document.createElement('button');
+        installBtn.className = 'ios-button';
+        installBtn.textContent = 'Install';
+        installBtn.addEventListener('click', () => {
+          const tweaks = loadTweaks();
+          // prevent duplicate by id
+          if (tweaks.some(x=>x.id===t.id)) { showAlert('Already installed'); return; }
+          tweaks.unshift({ ...t, enabled: false });
+          saveTweaks(tweaks);
+          showAlert('Installed '+t.name);
+          renderTweaks();
+        });
+        right.appendChild(installBtn);
+        row.appendChild(left);
+        row.appendChild(right);
+        repoList.appendChild(row);
+      });
+    }
+
+    const browserBtn = document.getElementById('browserBtn');
+    if (browserBtn) browserBtn.addEventListener('click', () => { renderRepo(); switchTab('tweakBrowser'); });
+    const backFromBrowserBtn = document.getElementById('backFromBrowserBtn');
+    if (backFromBrowserBtn) backFromBrowserBtn.addEventListener('click', () => switchTab('tweaks'));
+
+    // System info rendering
+    (function renderSystemInfo(){
+      const el = document.getElementById('sysInfo');
+      if (!el) return;
+      const nav = navigator;
+      const lines = [];
+      lines.push('User Agent: ' + nav.userAgent);
+      lines.push('Platform: ' + (nav.platform || ''));
+      lines.push('Language: ' + (nav.language || ''));
+      lines.push('Cores: ' + (nav.hardwareConcurrency || 'n/a'));
+      lines.push('Memory: ' + ((nav.deviceMemory && (nav.deviceMemory+' GB')) || 'n/a'));
+      lines.push('Screen: ' + screen.width + 'x' + screen.height + ' @' + (window.devicePixelRatio||1) + 'x');
+      lines.push('Timezone: ' + Intl.DateTimeFormat().resolvedOptions().timeZone);
+      el.textContent = lines.join('\n');
+    })();
+
+    // Import/Export data
+    const exportBtn = document.getElementById('exportDataBtn');
+    if (exportBtn) exportBtn.addEventListener('click', () => {
+      const data = { localStorage: { ...localStorage } };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'wormjb.wormdata';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+    const importBtn = document.getElementById('importDataBtn');
+    const importInput = document.getElementById('importDataInput');
+    if (importBtn && importInput) {
+      importBtn.addEventListener('click', () => importInput.click());
+      importInput.addEventListener('change', () => {
+        const file = importInput.files && importInput.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const parsed = JSON.parse(reader.result);
+            if (parsed && parsed.localStorage) {
+              Object.keys(parsed.localStorage).forEach(k => {
+                try { localStorage.setItem(k, parsed.localStorage[k]); } catch(e) {}
+              });
+              showAlert('Data imported. Reloading...');
+              setTimeout(()=>location.reload(), 600);
+            }
+          } catch (e) {
+            showAlert('Import failed: ' + (e && e.message ? e.message : e));
+          }
+        };
+        reader.readAsText(file);
+      });
+    }
+
+    // Theme handling (system/light/dark + custom bg + font override)
+    const THEME_MODE_KEY = 'themeMode'; // system|light|dark
+    const CUSTOM_BG_KEY = 'customBg';
+    const FONT_OVERRIDE_KEY = 'themeFont';
+
+    function applyTheme() {
+      const mode = localStorage.getItem(THEME_MODE_KEY) || 'system';
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const dark = mode === 'dark' || (mode === 'system' && prefersDark);
+      document.documentElement.classList.toggle('dark', dark);
+      const customBg = localStorage.getItem(CUSTOM_BG_KEY) || '';
+      const bg = customBg || (dark ? '#0b0b0d' : '#ffffff');
+      const border = dark ? '#2a2d34' : '#c6c6c8';
+      const textGray = dark ? '#a1a1aa' : '#555';
+      document.documentElement.style.setProperty('--ios-bg', bg);
+      document.documentElement.style.setProperty('--ios-border', border);
+      document.documentElement.style.setProperty('--ios-text-gray', textGray);
+      const font = localStorage.getItem(FONT_OVERRIDE_KEY) === 'true';
+      const themeFontToggle = document.getElementById('themeFontToggle');
+      if (themeFontToggle) themeFontToggle.checked = font;
+      if (font) setForceAppleFont(true); else setForceAppleFont(false);
+      // reflect selects
+      const sel = document.getElementById('themeModeSelect');
+      if (sel) sel.value = mode;
+      const color = document.getElementById('customBgColor');
+      if (color && customBg) color.value = customBg;
+      // Re-render lists that depend on theme (for per-item bg transforms)
+      try { renderTweaks(); } catch(e) {}
+      try { renderRepo(); } catch(e) {}
+    }
+
+    // Dark theme CSS variables (light/dark via .dark class)
+    (function injectDarkCSS(){
+      const style = document.createElement('style');
+      style.textContent = `
+        html.dark body { color: #fafafa; }
+        /* Scope surface overrides to dark mode only */
+        html.dark .ios-card, html.dark .ios-list { background: var(--ios-bg); border-color: var(--ios-border); }
+        html.dark .ios-list-item { border-color: var(--ios-border); }
+        html.dark header, html.dark .version, html.dark .tabs { background: var(--ios-bg); border-color: var(--ios-border); color: var(--ios-text-gray); }
+        /* Inputs/buttons get slight dark tweaks in dark mode */
+        html.dark .ios-button { background: #2563eb; color: #fff; }
+        html.dark .ios-button.danger { background: #ef4444; }
+        html.dark .ios-input { background: #1a1d23; color: #e5e7eb; border-color: #2a2d34; }
+        html.dark .slider { background-color: #333842; }
+        html.dark .ios-switch input:checked + .slider { background-color: #2563eb; }
+      `;
+      document.head.appendChild(style);
+    })();
+
+    const themeSel = document.getElementById('themeModeSelect');
+    const bgPicker = document.getElementById('customBgColor');
+    const fontT = document.getElementById('themeFontToggle');
+    if (themeSel) themeSel.addEventListener('change', ()=>{ localStorage.setItem(THEME_MODE_KEY, themeSel.value); applyTheme(); });
+    if (bgPicker) bgPicker.addEventListener('input', ()=>{ localStorage.setItem(CUSTOM_BG_KEY, bgPicker.value || ''); applyTheme(); });
+    if (fontT) fontT.addEventListener('change', ()=>{ localStorage.setItem(FONT_OVERRIDE_KEY, fontT.checked ? 'true' : 'false'); applyTheme(); });
+
+    // Follow system changes when in system mode
+    if (window.matchMedia) {
+      const mq = window.matchMedia('(prefers-color-scheme: dark)');
+      mq.addEventListener('change', () => applyTheme());
+    }
+
+    // Reload button
+    const reloadBtn = document.getElementById('reloadAppBtn');
+    if (reloadBtn) reloadBtn.addEventListener('click', ()=>location.reload());
+
+    // Apply theme at startup
+    applyTheme();
+
+    // Local image upload for profile icon (stored as data URL in localStorage)
+    (function setupProfileIconUpload() {
+      const fileInput = document.getElementById('profileIconFile');
+      if (!fileInput) return;
+      fileInput.addEventListener('change', () => {
+        const file = fileInput.files && fileInput.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          const dataUrl = reader.result;
+          const p = loadProfile();
+          p.icon = dataUrl;
+          saveProfile(p);
+          applyProfileToHeader();
+        };
+        reader.readAsDataURL(file);
+      });
+    })();
 
     // apply profile & dev UI initially
     applyProfileToHeader();
@@ -790,6 +1144,7 @@
       const sideStoreBtn = document.getElementById('installSideStoreBtn');
       const repoBtn = document.getElementById('openRepoBtn');
       const showScriptBtn = document.getElementById('showScriptBtn');
+      const openTermBtn = document.getElementById('openTerminalBtn');
       const mysteryBtn = document.getElementById('mysteryBtn');
 
       if (reBtn) reBtn.addEventListener('click', () => {
@@ -812,11 +1167,34 @@
       if (showScriptBtn) showScriptBtn.addEventListener('click', () => {
         window.open('https://github.com/wheatbread2056/wormJB/blob/main/jb/main.sh', '_blank');
       });
+      if (openTermBtn) openTermBtn.addEventListener('click', () => {
+        // Best-effort open A-Shell
+        window.location.href = 'ashell://';
+      });
       if (mysteryBtn) mysteryBtn.addEventListener('click', () => {
         showAlert('Absolutely nothing happened.');
       });
     }
     wireButtons();
+
+    // Disable Dev Mode button
+    (function setupDisableDevMode() {
+      const btn = document.getElementById('disableDevBtn');
+      if (!btn) return;
+      btn.addEventListener('click', () => {
+        localStorage.removeItem('devUnlocked');
+        // Remove Dev tab if present
+        const devTab = document.querySelector('.tab[data-tab="devsettings"]');
+        if (devTab) devTab.remove();
+        updateDevUI();
+        showAlert('Developer mode disabled');
+        // If currently on devsettings, go home
+        const activeDev = document.getElementById('devsettings').classList.contains('active');
+        if (activeDev) switchTab('home');
+        // Re-render tweaks to hide dev-only Settings buttons
+        renderTweaks();
+      });
+    })();
 
     // ---------- audio loop support ----------
     (function setupLoopingAudio() {
@@ -867,6 +1245,107 @@
       // initialize UI
       updateUI();
     })();
+
+    // ---------- Color utilities for tweak background brightness inversion (dark mode only) ----------
+    function isDarkMode() {
+      return document.documentElement.classList.contains('dark');
+    }
+
+    function parseHexColor(hex) {
+      if (!hex) return { r: 255, g: 255, b: 255, a: 1 };
+      hex = String(hex).trim();
+      if (hex[0] === '#') hex = hex.slice(1);
+      if (hex.length === 3) {
+        const r = parseInt(hex[0] + hex[0], 16);
+        const g = parseInt(hex[1] + hex[1], 16);
+        const b = parseInt(hex[2] + hex[2], 16);
+        return { r, g, b, a: 1 };
+      }
+      if (hex.length === 4) {
+        const r = parseInt(hex[0] + hex[0], 16);
+        const g = parseInt(hex[1] + hex[1], 16);
+        const b = parseInt(hex[2] + hex[2], 16);
+        const a = parseInt(hex[3] + hex[3], 16) / 255;
+        return { r, g, b, a };
+      }
+      if (hex.length === 6 || hex.length === 8) {
+        const r = parseInt(hex.slice(0, 2), 16);
+        const g = parseInt(hex.slice(2, 4), 16);
+        const b = parseInt(hex.slice(4, 6), 16);
+        const a = hex.length === 8 ? parseInt(hex.slice(6, 8), 16) / 255 : 1;
+        return { r, g, b, a };
+      }
+      // Not a hex; fallback by letting CSS handle it
+      return null;
+    }
+
+    function rgbToHsl(r, g, b) {
+      r /= 255; g /= 255; b /= 255;
+      const max = Math.max(r, g, b), min = Math.min(r, g, b);
+      let h, s, l = (max + min) / 2;
+      if (max === min) {
+        h = s = 0; // achromatic
+      } else {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max - min);
+        switch (max) {
+          case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+          case g: h = (b - r) / d + 2; break;
+          case b: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+      }
+      return { h, s, l };
+    }
+
+    function hslToRgb(h, s, l) {
+      let r, g, b;
+      if (s === 0) {
+        r = g = b = l; // achromatic
+      } else {
+        const hue2rgb = (p, q, t) => {
+          if (t < 0) t += 1;
+          if (t > 1) t -= 1;
+          if (t < 1/6) return p + (q - p) * 6 * t;
+          if (t < 1/2) return q;
+          if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+          return p;
+        };
+        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        const p = 2 * l - q;
+        r = hue2rgb(p, q, h + 1/3);
+        g = hue2rgb(p, q, h);
+        b = hue2rgb(p, q, h - 1/3);
+      }
+      return { r: Math.round(r * 255), g: Math.round(g * 255), b: Math.round(b * 255) };
+    }
+
+    function formatColor({ r, g, b, a }) {
+      a = (a == null ? 1 : a);
+      if (a >= 1) {
+        const toHex = (n) => n.toString(16).padStart(2, '0');
+        return '#' + toHex(r) + toHex(g) + toHex(b);
+      }
+      return `rgba(${r}, ${g}, ${b}, ${Math.round(a * 1000) / 1000})`;
+    }
+
+    function invertBrightnessColor(hex) {
+      const rgba = parseHexColor(hex);
+      if (!rgba) return hex; // unknown format, let CSS handle
+      const { r, g, b, a } = rgba;
+      const hsl = rgbToHsl(r, g, b);
+      // Invert lightness and clamp to avoid pure black/white extremes
+      const lInv = 1 - hsl.l;
+      const lClamped = Math.min(0.92, Math.max(0.08, lInv));
+      const { r: nr, g: ng, b: nb } = hslToRgb(hsl.h, hsl.s, lClamped);
+      return formatColor({ r: nr, g: ng, b: nb, a });
+    }
+
+    function resolveTweakBg(bg) {
+      // Only transform in dark mode; otherwise return as-is
+      if (!isDarkMode()) return bg;
+      try { return invertBrightnessColor(bg); } catch (e) { return bg; }
+    }
   </script>
 </body>
 </html>
