@@ -25,7 +25,7 @@ wormJB has only been tested on iOS 26.0.1 with the iPhone 15, in both A-Shell an
 That's it! Now wormJB should do its magic.
 
 ## How it Works
-The **pissra1n 2** tool is used. This is essential for wormJB.
+The **liquidra1n 2** tool is used. This is essential for wormJB.
 
 After this, the **semi-rootless environment** will be prepared by the wormJB scripts.
 
@@ -57,4 +57,4 @@ wormJB was inspired by:
 
 iOS is a trademark of Apple, Inc.
 
-The pissra1n scripts included in this repository are not at all affiliated or related with a real project using the same name: https://github.com/bomberfish/pissra1n
+No exploits that harm the security of iOS are included with this repository.

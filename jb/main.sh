@@ -1,5 +1,5 @@
 #!/bin/sh
-VERSION="1.1.0-beta5"
+VERSION="1.1.0-beta6"
 
 clear
 cd ~/Documents/wormJB
@@ -62,13 +62,13 @@ chmod +x ~/Documents/bin/neofetch
 
 sleep 1
 
-echo installing pissra1n...
-chmod +x ~/Documents/wormJB/jb/pissra1n.sh
+echo installing liquidra1n...
+chmod +x ~/Documents/wormJB/jb/liquidra1n.sh
 sleep 1.111
 
 # set up directories
 cd ~/Documents/wormJB/jb
-sh pissra1n.sh
+sh liquidra1n.sh
 
 sleep 0.519571
 

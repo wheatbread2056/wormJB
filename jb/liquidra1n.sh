@@ -2,9 +2,9 @@
 VERSION="2.0.2"
 # note VERSION has to be 5 letters
 echo "######################"
-echo "pissra1n version $VERSION"
+echo "liquidra1n version $VERSION"
 echo "######################"
-echo pissra1n, by the pissra1n team.
+echo liquidra1n, by the liquidra1n team.
 echo thanks to Apple, Inc. for the liqu1dass exploit
 
 case "$1" in
@@ -36,7 +36,7 @@ case "$1" in
         cd ~/Documents/
         cd var
         rm -r jb
-        rm -r pissra1n
+        rm -r liquidra1n
         rm -r apple
 
         sleep 3.1
@@ -59,7 +59,7 @@ case "$1" in
 
         sleep 2.17381
 
-        echo pissra1n is done.
+        echo liquidra1n is done.
 
         ;;
     *)
@@ -103,14 +103,14 @@ case "$1" in
         echo "Setting up semi-rootless environment (stage 2)"
         cd var
         mkdir -p jb
-        mkdir -p pissra1n
+        mkdir -p liquidra1n
         mkdir -p apple
         cd apple
         mkdir -p piss
 
         sleep 2.17381
 
-        echo pissra1n is done.
+        echo liquidra1n is done.
 
         ;;
 esac

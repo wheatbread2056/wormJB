@@ -5,8 +5,7 @@ case "$1" in
   credits)
     echo "wormJB version $wormjb_version"
     echo "made by: wheatbread2056"
-    echo "pissra1n 2 by the pissra1n team (wheatbread2056)"
-    echo "pissra1n 2 is NOT associated with pissra1n by bomberfish."
+    echo "liquidra1n 2 by the liquidra1n team (wheatbread2056)"
     echo "liqu1dass by Apple, Inc."
     echo "ashellfetch originally by GrandDiJay"
     echo "wormJB github: https://github.com/wheatbread2056/wormJB"
@@ -25,7 +24,7 @@ case "$1" in
     echo "failed: couldn't find cydiagold-semirootless-0.1.15.wormjbextension2"
     ;;
   revert)
-    ~/Documents/wormJB/jb/pissra1n.sh uninstall
+    ~/Documents/wormJB/jb/liquidra1n.sh uninstall
 
     sleep 0.5
 
