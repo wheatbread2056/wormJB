@@ -11,112 +11,462 @@
       --ios-blue: #007aff;
       --ios-gray: #f2f2f7;
       --ios-border: #c6c6c8;
+      --ios-bg: #ffffff;
+      --ios-text-gray: #555;
     }
-    body {
-      margin: 0;
+    html, body {
+      margin: 0; padding: 0;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: white;
+      background: var(--ios-bg);
       color: #000;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
+      height: 100%;
+      overflow: hidden;
     }
     header {
-      text-align: center;
-      padding: 1rem 0;
-      font-weight: 600;
-      font-size: 1.2rem;
+      position: fixed; top: 0; left: 0; right: 0;
+      height: 56px; display: flex; align-items: center; justify-content: center;
+      font-weight: 600; font-size: 1.2rem;
       border-bottom: 1px solid var(--ios-border);
-      background: white;
-      display: sticky;
+      background: white; z-index: 10;
+    }
+    .version {
+      position: fixed; top: 56px; width: 100%; text-align: center;
+      font-size: 0.8rem; color: #666; background: white; padding: 0.3rem 0;
+      z-index: 9;
     }
     main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
+      position: absolute; top: 84px; bottom: 60px; left: 0; right: 0;
+      overflow-y: auto; -webkit-overflow-scrolling: touch;
+      background: var(--ios-bg);
+      padding: 1rem; box-sizing: border-box;
     }
-    input[type=number] {
-      appearance: none;
-      -moz-appearance: textfield;
+    section { display: none; }
+    section.active { display: block; }
+
+    .ios-card {
+      background: white; border-radius: 16px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      padding: 1rem; margin: 1rem 0;
+    }
+    .ios-list {
+      background: white; border-radius: 12px;
+      overflow: hidden; border: 1px solid var(--ios-border);
+    }
+    .ios-list-item {
+      padding: 1rem; border-bottom: 1px solid var(--ios-border);
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 1rem;
+    }
+    .ios-list-item:last-child { border-bottom: none; }
+    .ios-button {
+      background: var(--ios-blue); color: white; border: none;
+      border-radius: 12px; font-size: 1rem; padding: 0.7rem 1.5rem;
+      font-weight: 500; cursor: pointer; transition: opacity 0.2s;
+    }
+    .ios-button:active { opacity: 0.6; }
+    .ios-button.danger { background: #ff3b30; }
+    .ios-input {
       border: 1px solid var(--ios-border);
-      border-radius: 12px;
-      padding: 0.6rem 1rem;
-      font-size: 1rem;
-      width: 60%;
-      text-align: center;
-      margin-bottom: 1rem;
-      background: var(--ios-gray);
+      border-radius: 12px; padding: 0.6rem 1rem;
+      font-size: 1rem; width: 100%;
+      background: var(--ios-gray); box-sizing: border-box;
+      margin: 0.5rem 0;
     }
-    button {
-      background: var(--ios-blue);
-      color: white;
-      border: none;
-      border-radius: 12px;
-      font-size: 1rem;
-      padding: 0.7rem 1.5rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: opacity 0.2s;
+    .ios-switch { position: relative; width: 50px; height: 28px; }
+    .ios-switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #ccc; border-radius: 34px; transition: .3s;
     }
-    button:active {
-      opacity: 0.6;
+    .slider:before {
+      position: absolute; content: "";
+      height: 22px; width: 22px; left: 3px; bottom: 3px;
+      background-color: white; border-radius: 50%; transition: .3s;
+    }
+    .ios-switch input:checked + .slider { background-color: var(--ios-blue); }
+    .ios-switch input:checked + .slider:before { transform: translateX(22px); }
+    .ios-alert {
+      position: fixed; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: white; border-radius: 14px; padding: 1.2rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      text-align: center; display: none; width: 80%; max-width: 320px;
     }
     .tabs {
-      display: flex;
-      border-top: 1px solid var(--ios-border);
-      background: white;
-      height: 60px;
+      position: fixed; bottom: 0; left: 0; right: 0;
+      display: flex; border-top: 1px solid var(--ios-border);
+      background: white; height: 60px; z-index: 10;
     }
     .tab {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      color: #8e8e93;
-      font-size: 0.7rem;
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      color: #8e8e93; font-size: 0.7rem; cursor: pointer;
+      user-select: none;
     }
-    .tab.active {
-      color: var(--ios-blue);
-    }
-    svg {
-      width: 22px;
-      height: 22px;
-      margin-bottom: 2px;
+    .tab.active { color: var(--ios-blue); }
+    svg { width: 22px; height: 22px; margin-bottom: 2px; }
+
+    /* When forcing Apple-like font (Inter) */
+    html.force-apple-font, html.force-apple-font body {
+      font-family: 'Inter', -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     }
   </style>
 </head>
 <body>
   <header>WormJB</header>
-  <p style="text-align:center">app version 0.0.3</p>
+  <div class="version">app version 0.0.4</div>
+
   <main>
-    <input type="number" placeholder="Enter number">
-    <button>Re-Jailbreak</button>
-    <p style="margin-top: 1rem; color: #555;">text here.</p>
+    <section id="home" class="active">
+      <div class="ios-card">
+        <h3>wormJB Actions</h3>
+        <div class="ios-list" style="margin-bottom:1rem;">
+          <div class="ios-list-item" style="flex-direction:column; align-items:stretch; gap:.5rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+              <span style="font-weight:500;">Re-Jailbreak</span>
+              <label class="ios-switch" title="Clean reinstall (runs revert first)">
+                <input type="checkbox" id="cleanReJB"><span class="slider"></span>
+              </label>
+            </div>
+            <button class="ios-button" id="reJBBtn">Re-Jailbreak</button>
+          </div>
+          <div class="ios-list-item" style="flex-direction:column; align-items:stretch; gap:.5rem;">
+            <span style="font-weight:500;">Remove Jailbreak</span>
+            <button class="ios-button danger" id="removeJBBtn">Remove Jailbreak</button>
+          </div>
+          <div class="ios-list-item" style="flex-direction:column; align-items:stretch; gap:.5rem;">
+            <span style="font-weight:500;">Install SideStore</span>
+            <button class="ios-button" id="installSideStoreBtn">Install SideStore</button>
+          </div>
+          <div class="ios-list-item" style="flex-direction:column; align-items:stretch; gap:.5rem;">
+            <span style="font-weight:500;">Open Repo</span>
+            <button class="ios-button" id="openRepoBtn">Open GitHub Repo</button>
+          </div>
+          <div class="ios-list-item" style="flex-direction:column; align-items:stretch; gap:.5rem;">
+            <span style="font-weight:500;">Show Re-Jailbreak Script</span>
+            <button class="ios-button" id="showScriptBtn">Show Script</button>
+          </div>
+          <div class="ios-list-item" style="flex-direction:column; align-items:stretch; gap:.5rem;">
+            <span style="font-weight:500;">Mystery Button (useless)</span>
+            <button class="ios-button" id="mysteryBtn">Do Nothing</button>
+          </div>
+        </div>
+        <p id="statusText" style="color: var(--ios-text-gray); margin-top: 0;">Status: Idle</p>
+      </div>
+    </section>
+
+    <section id="tweaks">
+      <div class="ios-list">
+        <div class="ios-list-item">
+          <span>Tweak 1</span>
+          <label class="ios-switch">
+            <input type="checkbox"><span class="slider"></span>
+          </label>
+        </div>
+        <div class="ios-list-item">
+          <span>Tweak 2</span>
+          <label class="ios-switch">
+            <input type="checkbox" checked><span class="slider"></span>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <section id="settings">
+      <div class="ios-card">
+        <h3>Settings</h3>
+        <div class="ios-list">
+          <div class="ios-list-item">
+            <span>Enable Logs</span>
+            <label class="ios-switch">
+              <input type="checkbox"><span class="slider"></span>
+            </label>
+          </div>
+          <div class="ios-list-item">
+            <span>Auto-update</span>
+            <label class="ios-switch">
+              <input type="checkbox" checked><span class="slider"></span>
+            </label>
+          </div>
+          <div class="ios-list-item" onclick="promptDebugCode()">
+            <span style="color: var(--ios-blue);">Debug</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="devsettings">
+      <div class="ios-card">
+        <h3>Developer Settings</h3>
+        <p style="color: var(--ios-text-gray)">You’ve unlocked the dev menu.</p>
+        <div class="ios-list">
+          <div class="ios-list-item">
+            <span>Verbose Logs</span>
+            <label class="ios-switch"><input type="checkbox"><span class="slider"></span></label>
+          </div>
+          <div class="ios-list-item">
+            <span>Experimental Mode</span>
+            <label class="ios-switch"><input type="checkbox"><span class="slider"></span></label>
+          </div>
+          <div class="ios-list-item">
+            <span>Force Apple Font (Web)</span>
+            <label class="ios-switch">
+              <input type="checkbox" id="forceAppleFontToggle"><span class="slider"></span>
+            </label>
+          </div>
+        </div>
+        <div style="margin-top: 1rem; display: flex; gap: .75rem;">
+          <button class="ios-button danger" onclick="clearAppData()">Clear App Data & Reload</button>
+        </div>
+      </div>
+    </section>
   </main>
-  <nav class="tabs">
-    <div class="tab" id="tweaks">
+
+  <div id="alert" class="ios-alert">
+    <h3>WormJB</h3>
+    <p id="alert-text">Placeholder text</p>
+    <button class="ios-button" onclick="hideAlert()">OK</button>
+  </div>
+
+  <nav class="tabs" id="tab-bar">
+    <div class="tab" data-tab="tweaks">
       <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-5"/><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
       <span>Tweaks</span>
     </div>
-    <div class="tab active" id="home">
+    <div class="tab active" data-tab="home">
       <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V21a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/></svg>
       <span>Home</span>
     </div>
-    <div class="tab" id="settings">
+    <div class="tab" data-tab="settings">
       <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 5 15.4a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 5.6a1.65 1.65 0 0 0 1-1.51V4a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       <span>Settings</span>
     </div>
   </nav>
+
   <script>
     const tabs = document.querySelectorAll('.tab');
-    tabs.forEach(t => t.addEventListener('click', () => {
-      tabs.forEach(tab => tab.classList.remove('active'));
-      t.classList.add('active');
-    }));
+    const sections = document.querySelectorAll('section');
+    const tabBar = document.getElementById('tab-bar');
+
+    function switchTab(target) {
+      tabs.forEach(t => t.classList.remove('active'));
+      const tab = [...tabs].find(t => t.dataset.tab === target);
+      if (tab) tab.classList.add('active');
+      sections.forEach(s => s.classList.remove('active'));
+      document.getElementById(target).classList.add('active');
+    }
+
+    tabs.forEach(tab => tab.addEventListener('click', () => switchTab(tab.dataset.tab)));
+
+    function showAlert(msg) {
+      const alertBox = document.getElementById('alert');
+      document.getElementById('alert-text').textContent = msg;
+      alertBox.style.display = 'block';
+    }
+    function hideAlert() {
+      document.getElementById('alert').style.display = 'none';
+    }
+
+    function promptDebugCode() {
+      const unlocked = localStorage.getItem('devUnlocked');
+      if (unlocked === 'true') {
+        showDevTab();
+        switchTab('devsettings');
+        return;
+      }
+      const code = prompt('Enter debug code:');
+      if (code === '176033') {
+        localStorage.setItem('devUnlocked', 'true');
+        showDevTab();
+        switchTab('devsettings');
+      }
+    }
+
+    function showDevTab() {
+      if (!document.querySelector('.tab[data-tab=\"devsettings\"]')) {
+        const devTab = document.createElement('div');
+        devTab.className = 'tab';
+        devTab.dataset.tab = 'devsettings';
+        devTab.innerHTML = `
+          <svg fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" viewBox=\"0 0 24 24\"><path d=\"M9 18l6-6-6-6\"/></svg>
+          <span>Dev</span>`;
+        devTab.addEventListener('click', () => switchTab('devsettings'));
+        tabBar.appendChild(devTab);
+      }
+    }
+
+    if (localStorage.getItem('devUnlocked') === 'true') {
+      showDevTab();
+    }
+
+    // Font forcing (Apple-like font using Inter from web)
+    const FORCE_FONT_KEY = 'forceAppleFont';
+
+    function ensureInterLoaded() {
+      if (document.getElementById('interFontLink')) return;
+      const link = document.createElement('link');
+      link.id = 'interFontLink';
+      link.rel = 'stylesheet';
+      link.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap';
+      document.head.appendChild(link);
+    }
+
+    function setForceAppleFont(enabled) {
+      localStorage.setItem(FORCE_FONT_KEY, enabled ? 'true' : 'false');
+      if (enabled) {
+        ensureInterLoaded();
+        document.documentElement.classList.add('force-apple-font');
+      } else {
+        document.documentElement.classList.remove('force-apple-font');
+      }
+      const cb = document.getElementById('forceAppleFontToggle');
+      if (cb) cb.checked = !!enabled;
+    }
+
+    // Initialize state from storage
+    if (localStorage.getItem(FORCE_FONT_KEY) === 'true') {
+      setForceAppleFont(true);
+    }
+
+    // Wire toggle if present
+    (function attachFontToggle() {
+      const cb = document.getElementById('forceAppleFontToggle');
+      if (!cb) return;
+      cb.checked = localStorage.getItem(FORCE_FONT_KEY) === 'true';
+      cb.addEventListener('change', (e) => setForceAppleFont(e.target.checked));
+    })();
+
+    async function clearAppData() {
+      const confirmClear = confirm('This will clear all saved data for this app (settings, caches, cookies) and reload. Dev menu will be locked again. Continue?');
+      if (!confirmClear) return;
+
+      try {
+        // Ensure dev menu will be locked on next load
+        try { localStorage.removeItem('devUnlocked'); } catch (e) {}
+
+        // Local/session storage
+        try { localStorage.clear(); } catch (e) {}
+        try { sessionStorage.clear(); } catch (e) {}
+
+        // IndexedDB (best-effort)
+        try {
+          if ('databases' in indexedDB && typeof indexedDB.databases === 'function') {
+            const dbs = await indexedDB.databases();
+            for (const db of dbs) {
+              if (db && db.name) {
+                try { indexedDB.deleteDatabase(db.name); } catch (e) {}
+              }
+            }
+          }
+        } catch (e) {}
+
+        // Cache Storage
+        try {
+          if (window.caches && caches.keys) {
+            const keys = await caches.keys();
+            await Promise.all(keys.map(k => caches.delete(k)));
+          }
+        } catch (e) {}
+
+        // Service Workers
+        try {
+          if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+            const regs = await navigator.serviceWorker.getRegistrations();
+            await Promise.all(regs.map(r => r.unregister()));
+          }
+        } catch (e) {}
+
+        // Cookies (best-effort for this origin)
+        try {
+          const cookies = document.cookie ? document.cookie.split(';') : [];
+          for (const c of cookies) {
+            const eqPos = c.indexOf('=');
+            const name = (eqPos > -1 ? c.substr(0, eqPos) : c).trim();
+            const expires = 'Thu, 01 Jan 1970 00:00:00 GMT';
+            document.cookie = `${name}=;expires=${expires};path=/`;
+            // Attempt domain-scoped delete as well
+            const host = location.hostname;
+            document.cookie = `${name}=;expires=${expires};path=/;domain=${host}`;
+            if (!host.startsWith('.')) {
+              document.cookie = `${name}=;expires=${expires};path=/;domain=.${host}`;
+            }
+          }
+        } catch (e) {}
+      } finally {
+        // Reload the page to reflect cleared state
+        location.reload();
+      }
+    }
+
+    // ---------- wormJB action helpers ----------
+    function setStatus(msg) {
+      const el = document.getElementById('statusText');
+      if (el) el.textContent = 'Status: ' + msg;
+    }
+
+    function buildReJailbreakCommands(clean) {
+      const cmds = [];
+      if (clean) cmds.push('wormjb revert || true');
+      cmds.push('cd ~/Documents');
+      cmds.push('rm -rf wormJB');
+      cmds.push('git clone https://github.com/wheatbread2056/wormJB');
+      cmds.push('cd wormJB');
+      cmds.push('sh jb/main.sh');
+      return cmds;
+    }
+
+    function openInAShell(commandsArray) {
+      // Combine commands using && so failure stops chain
+      const joined = commandsArray.join(' && ');
+      // URL scheme guess for A-Shell. If different, adjust run?cmd= parameter.
+      const url = 'ashell://run?command=' + encodeURIComponent(joined);
+      // Attempt navigation
+      setStatus('Launching A-Shell...');
+      // Copy to clipboard for fallback/paste
+      try {
+        navigator.clipboard.writeText(joined);
+      } catch (e) {
+        // ignore
+      }
+      // Navigate
+      window.location.href = url;
+      // Provide alert info
+      showAlert('Attempted to launch A-Shell. If it did not open, paste commands manually (already copied).');
+    }
+
+    function wireButtons() {
+      const reBtn = document.getElementById('reJBBtn');
+      const cleanToggle = document.getElementById('cleanReJB');
+      const removeBtn = document.getElementById('removeJBBtn');
+      const sideStoreBtn = document.getElementById('installSideStoreBtn');
+      const repoBtn = document.getElementById('openRepoBtn');
+      const showScriptBtn = document.getElementById('showScriptBtn');
+      const mysteryBtn = document.getElementById('mysteryBtn');
+
+      if (reBtn) reBtn.addEventListener('click', () => {
+        const cmds = buildReJailbreakCommands(cleanToggle && cleanToggle.checked);
+        openInAShell(cmds);
+      });
+      if (removeBtn) removeBtn.addEventListener('click', () => {
+        openInAShell(['wormjb revert']);
+      });
+      if (sideStoreBtn) sideStoreBtn.addEventListener('click', () => {
+        setStatus('Opening SideStore site...');
+        window.open('https://sidestore.io#get-started', '_blank');
+      });
+      if (repoBtn) repoBtn.addEventListener('click', () => {
+        setStatus('Opening repo...');
+        window.open('https://github.com/wheatbread2056/wormJB', '_blank');
+      });
+      if (showScriptBtn) showScriptBtn.addEventListener('click', () => {
+        const script = buildReJailbreakCommands(cleanToggle && cleanToggle.checked).join('\n');
+        showAlert(script);
+      });
+      if (mysteryBtn) mysteryBtn.addEventListener('click', () => {
+        showAlert('Absolutely nothing happened.');
+      });
+    }
+    wireButtons();
   </script>
 </body>
 </html>

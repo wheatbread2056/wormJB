@@ -1,5 +1,5 @@
 #!/bin/sh
-VERSION="1.1.0-beta7"
+VERSION="1.1.0-beta8"
 
 clear
 cd ~/Documents/wormJB
@@ -98,7 +98,11 @@ sleep 2.14
 cd ~/Documents/wormJB
 read -p "install wormjb app? (optional) (y/n): " answer
 case "$answer" in
-  [Yy]*) open jb/WormJB.mobileconfig ;;
+  [Yy]*) \
+    echo "Opening profile in Safari..."; \
+    # Attempt to open via Safari using direct https URL to file in repo
+    # Adjust URL if hosting changes; using raw GitHub content ensures Safari opens it
+    open https://raw.githubusercontent.com/wheatbread2056/wormJB/main/jb/WormJB.mobileconfig ;;
   [Nn]*) echo ok ;;
   *) echo "???" ;;
 esac
