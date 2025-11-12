@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>WormJB</title>
+  <style>
+    :root {
+      --ios-blue: #007aff;
+      --ios-gray: #f2f2f7;
+      --ios-border: #c6c6c8;
+    }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: white;
+      color: #000;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    header {
+      text-align: center;
+      padding: 1rem 0;
+      font-weight: 600;
+      font-size: 1.2rem;
+      border-bottom: 1px solid var(--ios-border);
+      background: white;
+    }
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    input[type=number] {
+      appearance: none;
+      -moz-appearance: textfield;
+      border: 1px solid var(--ios-border);
+      border-radius: 12px;
+      padding: 0.6rem 1rem;
+      font-size: 1rem;
+      width: 60%;
+      text-align: center;
+      margin-bottom: 1rem;
+      background: var(--ios-gray);
+    }
+    button {
+      background: var(--ios-blue);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      padding: 0.7rem 1.5rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    button:active {
+      opacity: 0.6;
+    }
+    .tabs {
+      display: flex;
+      border-top: 1px solid var(--ios-border);
+      background: white;
+      height: 60px;
+    }
+    .tab {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #8e8e93;
+      font-size: 0.7rem;
+    }
+    .tab.active {
+      color: var(--ios-blue);
+    }
+    svg {
+      width: 22px;
+      height: 22px;
+      margin-bottom: 2px;
+    }
+  </style>
+</head>
+<body>
+  <header>WormJB</header>
+  <main>
+    <input type="number" placeholder="Enter number">
+    <button>Re-Jailbreak</button>
+    <p style="margin-top: 1rem; color: #555;">text here.</p>
+  </main>
+  <nav class="tabs">
+    <div class="tab" id="tweaks">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-5"/><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      <span>Tweaks</span>
+    </div>
+    <div class="tab active" id="home">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V21a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/></svg>
+      <span>Home</span>
+    </div>
+    <div class="tab" id="settings">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 5 15.4a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 5.6a1.65 1.65 0 0 0 1-1.51V4a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span>Settings</span>
+    </div>
+  </nav>
+  <script>
+    const tabs = document.querySelectorAll('.tab');
+    tabs.forEach(t => t.addEventListener('click', () => {
+      tabs.forEach(tab => tab.classList.remove('active'));
+      t.classList.add('active');
+    }));
+  </script>
+</body>
+</html>
