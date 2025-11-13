@@ -124,6 +124,10 @@
       color: var(--ios-text-gray); font-size: 0.7rem; cursor: pointer;
       user-select: none;
     }
+
+    /* Add consistent gap between icon and label and allow top alignment when tabs are tall */
+    .tab { gap: 6px; }
+    .tabs.tall .tab { justify-content: flex-start; padding-top: 8px; }
     .tab.active { color: var(--ios-blue); }
   svg { width: 22px; height: 22px; margin-bottom: 2px; }
 
@@ -143,6 +147,9 @@
 
   /* Version pill next to title */
   .version-pill { border: 1px solid var(--ios-border); color: var(--ios-text-gray); border-radius: 9999px; padding: 0.05rem 0.5rem; font-size: 0.8rem; font-weight: 500; }
+  .ios-button.magenta { background: #d946ef; }
+  .tabs.tall { height: 80px; }
+  /* When tabs are tall, give main extra bottom spacing; applied via JS */
 
     /* When forcing Apple-like font (Inter) */
     html.force-apple-font, html.force-apple-font body {
@@ -188,7 +195,7 @@
   <main>
     <section id="home" class="active">
       <div class="ios-card">
-        <h3>wormJB Actions</h3>
+  <h3 id="welcomeTitle">Welcome, WormJB User</h3>
 
         <!-- Compact action buttons (no extra titles) -->
         <div class="ios-list" style="margin-top:0.5rem;">
@@ -213,7 +220,7 @@
         </div>
 
         <div style="margin-top:.75rem; display:flex; gap:.5rem; align-items:center;">
-          <button class="ios-button" id="audioToggleBtn">Play Looping Audio</button>
+          <button class="ios-button magenta" id="audioToggleBtn">Play Looping Audio</button>
           <span style="color: var(--ios-text-gray); font-size:0.9rem;">Looping: <strong id="audioState">off</strong></span>
         </div>
       </div>
@@ -293,25 +300,40 @@
     <section id="profile">
       <div class="ios-card">
         <h3>Profile</h3>
-        <div class="ios-list" style="padding:1rem;">
-          <div style="display:flex; gap:.5rem; align-items:center; margin-bottom:.5rem;">
+        <div class="ios-list" style="padding:0;">
+          <div class="ios-list-item" style="align-items:center; gap:0.75rem;">
             <img id="profileIconLarge" src="assets/wormjbicon.png" style="width:64px; height:64px; border-radius:12px;" />
             <div style="flex:1;">
-              <label>Username</label>
-              <input id="profileUsername" class="ios-input" />
-              <label>Full Name</label>
-              <input id="profileFullname" class="ios-input" />
-              <label style="margin-top:.5rem;">Display Mode</label>
-              <div style="display:flex; gap:.5rem; align-items:center; margin-bottom:0.5rem;">
-                <label style="display:flex; gap:.4rem; align-items:center;"><input type="radio" name="profileMode" value="icon" id="modeIcon"> Icon Mode</label>
-                <label style="display:flex; gap:.4rem; align-items:center;"><input type="radio" name="profileMode" value="button" id="modeButton"> Button Mode</label>
+              <div style="display:flex; justify-content:space-between; align-items:center; gap:0.5rem;">
+                <div style="flex:1;">
+                  <label style="display:block; font-size:0.85rem; margin-bottom:0.25rem;">Username</label>
+                  <input id="profileUsername" class="ios-input" />
+                </div>
               </div>
-              <label>Profile Icon Image</label>
-              <input id="profileIconFile" type="file" accept="image/*" class="ios-input" style="padding:.4rem;" />
-              <small style="color: var(--ios-text-gray);">Image stays local in your browser. Nothing is uploaded.</small>
             </div>
           </div>
-          <div style="display:flex; gap:.5rem; justify-content:center; margin-top:.5rem;">
+
+          <div class="ios-list-item" style="display:flex; flex-direction:column; gap:0.35rem;">
+            <div style="display:flex; gap:0.75rem; align-items:center;">
+              <span style="font-weight:600;">Display Mode</span>
+            </div>
+            <div style="display:flex; gap:0.75rem; align-items:center;">
+              <label style="display:flex; gap:.4rem; align-items:center;"><input type="radio" name="profileMode" value="icon" id="modeIcon"> Icon Mode</label>
+              <label style="display:flex; gap:.4rem; align-items:center;"><input type="radio" name="profileMode" value="button" id="modeButton"> Button Mode</label>
+            </div>
+          </div>
+
+          <div class="ios-list-item" style="flex-direction:column; gap:0.35rem; align-items:flex-start;">
+            <div style="display:flex; width:100%; justify-content:space-between; align-items:center;">
+              <div>
+                <label style="display:block; font-size:0.85rem; margin-bottom:0.25rem;">Profile Icon Image</label>
+                <input id="profileIconFile" type="file" accept="image/*" class="ios-input" style="padding:.4rem; width:220px;" />
+                <div style="margin-top:0.35rem; color: var(--ios-text-gray); font-size:0.85rem;">Image stays local in your browser. Nothing is uploaded.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ios-list-item" style="display:flex; gap:.5rem; justify-content:center;">
             <button class="ios-button" id="saveProfileBtn">Save</button>
             <button class="ios-button" id="closeProfileBtn">Close</button>
           </div>
@@ -354,10 +376,30 @@
           <div class="ios-list-item">
             <span>Custom Background</span>
             <input type="color" id="customBgColor" class="ios-input" style="width:64px; padding:0;">
+            <button class="ios-button" id="resetBgBtn" style="margin-left:.5rem;">Reset</button>
           </div>
-          <div class="ios-list-item">
-            <span>Apple-like Font</span>
-            <label class="ios-switch"><input type="checkbox" id="themeFontToggle"><span class="slider"></span></label>
+          <div class="ios-list-item" style="flex-direction:column; align-items:flex-start; gap:.35rem;">
+            <div style="display:flex; align-items:center; gap:.5rem; width:100%; justify-content:space-between;">
+              <span>Font</span>
+              <div style="display:flex; align-items:center; gap:.5rem;">
+                <select id="themeFontSelect" class="ios-input" style="width:120px;">
+                  <option value="system">System</option>
+                  <option value="inter">Inter</option>
+                  <option value="other">Other...</option>
+                </select>
+                <input id="themeFontOther" class="ios-input" placeholder="Font-family (e.g. 'Roboto')" style="display:none; width:160px;" />
+              </div>
+            </div>
+            <div style="display:flex; gap:.75rem; align-items:center; width:100%;">
+              <div style="display:flex; align-items:center; gap:0.5rem;">
+                <span style="font-size:0.95rem;">Disable Music</span>
+                <label class="ios-switch"><input type="checkbox" id="musicDisableToggle"><span class="slider"></span></label>
+              </div>
+              <div style="display:flex; align-items:center; gap:0.5rem;">
+                <span style="font-size:0.95rem;">Tall Tabs (notched)</span>
+                <label class="ios-switch"><input type="checkbox" id="tabsNotchToggle"><span class="slider"></span></label>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -716,8 +758,7 @@
 
     function applyProfileToHeader() {
       const p = loadProfile();
-  const name = p.username || 'WormJB User';
-      const full = p.fullname || '';
+      const name = p.username || 'WormJB User';
       const icon = p.icon || 'assets/wormjbicon.png';
       const mode = p.displayMode || 'icon';
 
@@ -731,9 +772,9 @@
       if (img) img.src = icon;
       if (imgLarge) imgLarge.src = icon;
 
-      // Use full name as tooltip on the icon/button
-      const wrap = document.getElementById('headerProfileWrap');
-      if (wrap) wrap.title = full || name;
+  // Use username as tooltip on the icon/button
+  const wrap = document.getElementById('headerProfileWrap');
+  if (wrap) wrap.title = name;
 
       // Set the button label inside the profile button (used in Button Mode)
       const btnLabel = document.getElementById('profileBtnLabel');
@@ -744,13 +785,9 @@
 
       // populate profile fields in profile panel
       const inputUser = document.getElementById('profileUsername');
-      const fn = document.getElementById('profileFullname');
-      const iu = document.getElementById('profileIconUrl');
       const modeIcon = document.getElementById('modeIcon');
       const modeButton = document.getElementById('modeButton');
       if (inputUser) inputUser.value = p.username || '';
-      if (fn) fn.value = p.fullname || '';
-      if (iu) iu.value = p.icon || '';
       if (modeIcon) modeIcon.checked = (mode === 'icon');
       if (modeButton) modeButton.checked = (mode === 'button');
     }
@@ -803,7 +840,7 @@
       const mode = (document.getElementById('modeButton') && document.getElementById('modeButton').checked) ? 'button' : 'icon';
       const p = {
         username: document.getElementById('profileUsername').value,
-        fullname: document.getElementById('profileFullname').value,
+        // Keep any previously saved icon (uploads are handled elsewhere), fallback to default
         icon: (loadProfile().icon) || 'assets/wormjbicon.png',
         displayMode: mode
       };
@@ -984,6 +1021,10 @@
     const THEME_MODE_KEY = 'themeMode'; // system|light|dark
     const CUSTOM_BG_KEY = 'customBg';
     const FONT_OVERRIDE_KEY = 'themeFont';
+  const THEME_FONT_CHOICE_KEY = 'themeFontChoice'; // system|inter|other
+  const THEME_FONT_OTHER_KEY = 'themeFontOther';
+  const MUSIC_DISABLED_KEY = 'musicDisabled';
+  const TABS_NOTCH_KEY = 'tabsNotch';
 
     function applyTheme() {
       const mode = localStorage.getItem(THEME_MODE_KEY) || 'system';
@@ -997,10 +1038,16 @@
       document.documentElement.style.setProperty('--ios-bg', bg);
       document.documentElement.style.setProperty('--ios-border', border);
       document.documentElement.style.setProperty('--ios-text-gray', textGray);
-      const font = localStorage.getItem(FONT_OVERRIDE_KEY) === 'true';
-      const themeFontToggle = document.getElementById('themeFontToggle');
-      if (themeFontToggle) themeFontToggle.checked = font;
-      if (font) setForceAppleFont(true); else setForceAppleFont(false);
+      // Font handling: system | inter | other
+      const fontChoice = localStorage.getItem(THEME_FONT_CHOICE_KEY) || 'system';
+      const fontOther = localStorage.getItem(THEME_FONT_OTHER_KEY) || '';
+      const fontSelect = document.getElementById('themeFontSelect');
+      const fontOtherInput = document.getElementById('themeFontOther');
+      if (fontSelect) fontSelect.value = fontChoice;
+      if (fontOtherInput) { fontOtherInput.value = fontOther; fontOtherInput.style.display = (fontChoice==='other') ? 'inline-block' : 'none'; }
+      if (fontChoice === 'inter') { ensureInterLoaded(); document.documentElement.classList.add('force-apple-font'); document.documentElement.style.fontFamily = ''; }
+      else if (fontChoice === 'other') { document.documentElement.classList.remove('force-apple-font'); document.documentElement.style.fontFamily = fontOther || ''; }
+      else { document.documentElement.classList.remove('force-apple-font'); document.documentElement.style.fontFamily = ''; }
       // reflect selects
       const sel = document.getElementById('themeModeSelect');
       if (sel) sel.value = mode;
@@ -1009,6 +1056,16 @@
       // Re-render lists that depend on theme (for per-item bg transforms)
       try { renderTweaks(); } catch(e) {}
       try { renderRepo(); } catch(e) {}
+      // Music disabled state
+      const musicDisabled = localStorage.getItem(MUSIC_DISABLED_KEY) === 'true';
+      const audioBtn = document.getElementById('audioToggleBtn');
+      const audioEl = document.getElementById('bgAudio');
+      if (audioBtn) audioBtn.style.display = musicDisabled ? 'none' : 'inline-block';
+      if (audioEl && musicDisabled) { try{ audioEl.pause(); audioEl.src = ''; }catch(e){} }
+      // Tabs notch handling
+      const tabsNotch = localStorage.getItem(TABS_NOTCH_KEY);
+      const enabledNotch = (tabsNotch === null ? 'true' : tabsNotch) === 'true';
+      applyTabHeight(enabledNotch);
     }
 
     // Dark theme CSS variables (light/dark via .dark class)
@@ -1030,12 +1087,20 @@
       document.head.appendChild(style);
     })();
 
-    const themeSel = document.getElementById('themeModeSelect');
-    const bgPicker = document.getElementById('customBgColor');
-    const fontT = document.getElementById('themeFontToggle');
-    if (themeSel) themeSel.addEventListener('change', ()=>{ localStorage.setItem(THEME_MODE_KEY, themeSel.value); applyTheme(); });
-    if (bgPicker) bgPicker.addEventListener('input', ()=>{ localStorage.setItem(CUSTOM_BG_KEY, bgPicker.value || ''); applyTheme(); });
-    if (fontT) fontT.addEventListener('change', ()=>{ localStorage.setItem(FONT_OVERRIDE_KEY, fontT.checked ? 'true' : 'false'); applyTheme(); });
+  const themeSel = document.getElementById('themeModeSelect');
+  const bgPicker = document.getElementById('customBgColor');
+  const resetBgBtn = document.getElementById('resetBgBtn');
+  const fontSelect = document.getElementById('themeFontSelect');
+  const fontOtherInput = document.getElementById('themeFontOther');
+  const musicToggle = document.getElementById('musicDisableToggle');
+  const tabsNotchToggle = document.getElementById('tabsNotchToggle');
+  if (themeSel) themeSel.addEventListener('change', ()=>{ localStorage.setItem(THEME_MODE_KEY, themeSel.value); applyTheme(); });
+  if (bgPicker) bgPicker.addEventListener('input', ()=>{ localStorage.setItem(CUSTOM_BG_KEY, bgPicker.value || ''); applyTheme(); });
+  if (resetBgBtn) resetBgBtn.addEventListener('click', ()=>{ localStorage.removeItem(CUSTOM_BG_KEY); if (bgPicker) bgPicker.value = '#ffffff'; applyTheme(); });
+  if (fontSelect) fontSelect.addEventListener('change', ()=>{ localStorage.setItem(THEME_FONT_CHOICE_KEY, fontSelect.value); applyTheme(); });
+  if (fontOtherInput) fontOtherInput.addEventListener('input', ()=>{ localStorage.setItem(THEME_FONT_OTHER_KEY, fontOtherInput.value || ''); applyTheme(); });
+  if (musicToggle) { musicToggle.checked = localStorage.getItem(MUSIC_DISABLED_KEY) === 'true'; musicToggle.addEventListener('change', ()=>{ localStorage.setItem(MUSIC_DISABLED_KEY, musicToggle.checked ? 'true' : 'false'); applyTheme(); }); }
+  if (tabsNotchToggle) { tabsNotchToggle.checked = (localStorage.getItem(TABS_NOTCH_KEY) === null) ? true : (localStorage.getItem(TABS_NOTCH_KEY) === 'true'); tabsNotchToggle.addEventListener('change', ()=>{ localStorage.setItem(TABS_NOTCH_KEY, tabsNotchToggle.checked ? 'true' : 'false'); applyTabHeight(tabsNotchToggle.checked); }); }
 
     // Follow system changes when in system mode
     if (window.matchMedia) {
@@ -1049,6 +1114,20 @@
 
     // Apply theme at startup
     applyTheme();
+
+    // Adjust tab height and main bottom spacing
+    function applyTabHeight(enabled) {
+      const tabBarEl = document.getElementById('tab-bar');
+      const mainEl = document.querySelector('main');
+      if (!tabBarEl || !mainEl) return;
+      if (enabled) {
+        tabBarEl.classList.add('tall');
+        mainEl.style.bottom = '90px';
+      } else {
+        tabBarEl.classList.remove('tall');
+        mainEl.style.bottom = '60px';
+      }
+    }
 
     // Local image upload for profile icon (stored as data URL in localStorage)
     (function setupProfileIconUpload() {
@@ -1072,6 +1151,15 @@
     // apply profile & dev UI initially
     applyProfileToHeader();
     updateDevUI();
+
+    // Update welcome title whenever profile applied
+    function updateWelcomeTitle() {
+      const p = loadProfile();
+      const name = p.username || 'WormJB User';
+      const el = document.getElementById('welcomeTitle');
+      if (el) el.textContent = 'Welcome, ' + name;
+    }
+    updateWelcomeTitle();
 
     async function clearAppData() {
       const confirmClear = confirm('This will clear all saved data for this app (settings, caches, cookies) and reload. Dev menu will be locked again. Continue?');
@@ -1214,7 +1302,7 @@
       // handle space in filename
       const src = encodeURI('assets/test 104.mp3');
       audio.src = src;
-      // Looping is enabled by default (user requested)
+  // Looping is enabled by default (user requested)
       audio.loop = true;
       audio.volume = 0.8;
 
@@ -1225,9 +1313,14 @@
       }
 
       // Try immediate play; if blocked, start playback on first user interaction
-      audio.play().then(() => {
-        updateUI();
-      }).catch(() => {
+      const musicDisabled = localStorage.getItem(MUSIC_DISABLED_KEY) === 'true';
+      if (musicDisabled) {
+        toggle.style.display = 'none';
+        state.textContent = 'off';
+      } else {
+        audio.play().then(() => {
+          updateUI();
+        }).catch(() => {
         // Autoplay blocked; set UI and wait for first user gesture
         updateUI();
         const startOnGesture = () => {
@@ -1237,7 +1330,8 @@
         document.addEventListener('pointerdown', startOnGesture, { once: true, capture: true });
         // also listen for keydown as a fallback
         document.addEventListener('keydown', startOnGesture, { once: true, capture: true });
-      });
+        });
+      }
 
       toggle.addEventListener('click', () => {
         if (audio.paused) {
