@@ -93,6 +93,26 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.3);
       text-align: center; display: none; width: 80%; max-width: 320px;
     }
+    /* Dark mode for alerts/modals */
+    html.dark .ios-alert { background: #111315; color: #e5e7eb; border: 1px solid var(--ios-border); }
+
+    /* Scrollable tweak edit modal cleanup */
+    #tweakModal { max-height: 80vh; width: 92vw; max-width: 420px; display: none; padding: 0; overflow: hidden; }
+    #tweakModal h3 { margin: 1rem 1rem 0.25rem 1rem; }
+    #tweakModalBody { text-align: left; margin: 0; padding: 0 1rem 0.5rem 1rem; max-height: 58vh; overflow-y: auto; }
+    #tweakModal .modal-actions { display:flex; gap:.5rem; margin: .75rem 1rem 1rem; justify-content:center; flex-wrap:wrap; }
+
+    /* Preserve newlines in System Info */
+    #sysInfo { white-space: pre-wrap; }
+
+    /* Status colors */
+    .status-row { display:flex; align-items:center; justify-content:space-between; padding: .5rem 1rem; border-top: 1px solid var(--ios-border); }
+    .status-row:first-child { border-top: none; }
+    .status-pill { font-weight:600; }
+    .status-red { color: #ef4444; }
+    .status-yellow { color: #eab308; }
+    .status-green { color: #22c55e; }
+    .status-magenta { color: #d946ef; }
     .tabs {
       position: fixed; bottom: 0; left: 0; right: 0;
       display: flex; border-top: 1px solid var(--ios-border);
@@ -121,6 +141,9 @@
     #headerUsername { color: var(--ios-text-gray); }
     .tweak-right { display:flex; align-items:center; gap:.5rem; flex: 0 0 auto; }
 
+  /* Version pill next to title */
+  .version-pill { border: 1px solid var(--ios-border); color: var(--ios-text-gray); border-radius: 9999px; padding: 0.05rem 0.5rem; font-size: 0.8rem; font-weight: 500; }
+
     /* When forcing Apple-like font (Inter) */
     html.force-apple-font, html.force-apple-font body {
       font-family: 'Inter', -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -147,7 +170,10 @@
 </head>
 <body>
   <header style="display:flex; align-items:center; justify-content:space-between; padding:0 1rem;">
-    <div style="font-weight:600; font-size:1.2rem; text-align:left;">WormJB</div>
+    <div style="display:flex; align-items:center; gap:.5rem;">
+      <span style="font-weight:600; font-size:1.2rem;">WormJB</span>
+      <span id="appVersion" class="version-pill">BETA</span>
+    </div>
     <div id="headerProfileWrap" style="display:flex; align-items:center; gap:.5rem;">
   <span id="headerUsername" style="color: var(--ios-text-gray); font-size:0.95rem;">WormJB User</span>
       <!-- Profile button/icon. In Icon Mode this will be shown as an unstyled icon button; in Button Mode it will have .ios-button styling and include the username label inside the button -->
@@ -157,25 +183,12 @@
       </button>
     </div>
   </header>
-  <div class="version">app version 0.3.1</div>
+  
 
   <main>
     <section id="home" class="active">
       <div class="ios-card">
         <h3>wormJB Actions</h3>
-        <!-- Re-Jailbreak section (separated) -->
-        <div class="ios-list" style="margin-bottom:0.75rem;">
-          <div class="ios-list-item" style="flex-direction:column; align-items:stretch; gap:.5rem;">
-            <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-              <span style="font-weight:500;">Re-Jailbreak</span>
-              <label class="ios-switch" title="Clean reinstall (runs revert first)">
-                <input type="checkbox" id="cleanReJB"><span class="slider"></span>
-              </label>
-            </div>
-            <button class="ios-button" id="reJBBtn">Re-Jailbreak</button>
-            <p id="statusText" style="color: var(--ios-text-gray); margin:0.25rem 0 0 0;">Status: Idle</p>
-          </div>
-        </div>
 
         <!-- Compact action buttons (no extra titles) -->
         <div class="ios-list" style="margin-top:0.5rem;">
@@ -204,6 +217,22 @@
           <span style="color: var(--ios-text-gray); font-size:0.9rem;">Looping: <strong id="audioState">off</strong></span>
         </div>
       </div>
+      <div class="ios-card">
+        <h3>Status Report</h3>
+        <div class="ios-list">
+          <div class="status-row"><span>Sandboxed</span><span class="status-pill status-red">False</span></div>
+          <div class="status-row"><span>PPL</span><span class="status-pill status-red">False</span></div>
+          <div class="status-row"><span>SPTM</span><span class="status-pill status-red">False</span></div>
+          <div class="status-row"><span>Environment</span><span class="status-pill status-yellow">Semi-Rootless</span></div>
+          <div class="status-row"><span>SEP</span><span class="status-pill status-green">True</span></div>
+          <div class="status-row"><span>WormJB</span><span class="status-pill status-green">True</span></div>
+          <div class="status-row"><span>Root Access</span><span class="status-pill status-green">True</span></div>
+          <div class="status-row"><span>Made with</span><span class="status-pill status-magenta">love</span></div>
+        </div>
+        <div style="display:flex; justify-content:center; margin-top:.75rem;">
+          <button class="ios-button" id="copyHashBtn">Copy WormJB Device Hash</button>
+        </div>
+      </div>
     </section>
 
     <section id="tweaks">
@@ -218,7 +247,7 @@
       <!-- Tweak edit modal (dev only) -->
       <div id="tweakModal" class="ios-alert" style="display:none;">
         <h3>Edit Tweak</h3>
-        <div style="text-align:left; margin-top:.5rem;">
+        <div id="tweakModalBody" style="text-align:left; margin-top:.5rem;">
           <label>Name</label>
           <input id="tweakName" class="ios-input" />
           <label>ID</label>
@@ -241,7 +270,7 @@
           <label>Disable Confirmation Prompt</label>
           <input id="tweakDisablePrompt" class="ios-input" placeholder="Are you sure you want to disable?" />
         </div>
-        <div style="display:flex; gap:.5rem; margin-top: .75rem; justify-content:center; flex-wrap:wrap;">
+        <div class="modal-actions" style="display:flex; gap:.5rem; margin-top: .75rem; justify-content:center; flex-wrap:wrap;">
           <button class="ios-button" id="saveTweakBtn">Save</button>
           <button class="ios-button danger" id="deleteTweakBtn">Delete</button>
           <button class="ios-button" onclick="hideAlert()">Cancel</button>
@@ -804,50 +833,55 @@
       openTweakEditor(0);
     });
 
-    // Browser data (25 local tweaks) with stable, readable IDs
+    // Browser data: varied tweaks (naming conventions, versions, dates) and some apps
     function slugifyName(n){
       return String(n).toLowerCase().replace(/[^a-z0-9]+/g,'').trim();
     }
-    const REPO_NAMES = [
-      'AeroDock','ClearBadge','StatusFlex','NightOwl','QuickSettings','LiveBattery','SnapGrid','SilentTap','AppLocker','UIRounder','EdgeSwipe','HaptiTune','LockGlyph','ScreenDimmer','IconWeaver','TintKit','MusicBar','PopupKill','ReachPlus','QuietHours','ShadowLess','FolderArt','HUDLite','Springy','BlurBoost'
+    const REPO_ITEMS = [
+      // Tweaks
+      { type:'tweak', name:'AeroDock', desc:'Sleek dock transparency for Home Screen.', ver:'1.0.0', date:'2025-01-15', author:'azuki', bg:'#eef7ff' },
+      { type:'tweak', name:'ClearBadge+', desc:'Clear badges with a pull gesture.', ver:'1.2.3', date:'2025-02-01', author:'mara', bg:'#fef3c7' },
+      { type:'tweak', name:'StatusFlex 2', desc:'Customize status bar elements.', ver:'2.0.0', date:'2025-02-20', author:'luke', bg:'#f3f4f6' },
+      { type:'tweak', name:'Night Owl (Beta)', desc:'True system-wide dark enhancement.', ver:'0.9.0-beta', date:'2025-03-05', author:'nero', bg:'#1118270d' },
+      { type:'tweak', name:'QuickSettings Pro', desc:'Fast toggles in Control Center.', ver:'3.1.4', date:'2025-03-22', author:'olive', bg:'#ecfccb' },
+      { type:'tweak', name:'LiveBattery Ring', desc:'Live battery ring on icons.', ver:'1.0.5', date:'2025-04-10', author:'finn', bg:'#f5f3ff' },
+      { type:'tweak', name:'SnapGrid', desc:'Snap icons to a neat grid.', ver:'1.3.0', date:'2025-04-28', author:'kai', bg:'#e0f2fe' },
+      { type:'tweak', name:'SilentTap', desc:'Silence camera shutter with a tap.', ver:'0.9.9', date:'2025-05-09', author:'zoe', bg:'#fef2f2' },
+      { type:'tweak', name:'AppLocker', desc:'Passcode protect chosen apps.', ver:'2.4.1', date:'2025-05-21', author:'ian', bg:'#f3e8ff' },
+      { type:'tweak', name:'UI Rounder', desc:'Round UI corners system-wide.', ver:'1.0', date:'2025-06-01', author:'xeno', bg:'#f0fdf4' },
+      { type:'tweak', name:'EdgeSwipe', desc:'Gesture from edges to switch apps.', ver:'1.0.7', date:'2025-06-12', author:'vera', bg:'#fff7ed' },
+      { type:'tweak', name:'HaptiTune', desc:'Fine-tune haptics feedback.', ver:'1.5.0', date:'2025-06-30', author:'noah', bg:'#f1f5f9' },
+      { type:'tweak', name:'LockGlyph', desc:'Animated lock glyph on unlock.', ver:'1.2', date:'2025-07-08', author:'gale', bg:'#fef9c3' },
+      { type:'tweak', name:'ScreenDimmer X', desc:'Auto-dim screen intelligently.', ver:'10.0', date:'2025-07-20', author:'ivy', bg:'#fafafa' },
+      { type:'tweak', name:'IconWeaver', desc:'Weave custom icon overlays.', ver:'0.8.2', date:'2025-08-01', author:'sol', bg:'#ffe4e6' },
+      { type:'tweak', name:'TintKit+', desc:'Global tint color control.', ver:'1.1.1', date:'2025-08-14', author:'tori', bg:'#fefce8' },
+      { type:'tweak', name:'Music Bar Lite', desc:'Compact music bar on Home.', ver:'1.0.2', date:'2025-08-29', author:'milo', bg:'#eff6ff' },
+      { type:'tweak', name:'PopupKill 2', desc:'Auto-close annoying popups.', ver:'2.0.3', date:'2025-09-09', author:'aria', bg:'#f0f9ff' },
+      { type:'tweak', name:'ReachPlus', desc:'Extended reachability options.', ver:'3.0.0', date:'2025-09-20', author:'rhett', bg:'#f7fee7' },
+      { type:'tweak', name:'QuietHours', desc:'Schedule silence times.', ver:'1.4.6', date:'2025-10-01', author:'yuna', bg:'#f8fafc' },
+      { type:'tweak', name:'ShadowLess', desc:'Remove icon drop-shadows.', ver:'1.0', date:'2025-10-12', author:'zane', bg:'#f5f5f5' },
+      { type:'tweak', name:'FolderArt', desc:'Custom images for folders.', ver:'0.4.0', date:'2025-10-18', author:'dina', bg:'#faf5ff' },
+      { type:'tweak', name:'HUD Lite', desc:'Minimal volume HUD.', ver:'1.7.2', date:'2025-10-25', author:'quinn', bg:'#f0fdfa' },
+      { type:'tweak', name:'Springy', desc:'Bouncy spring animations.', ver:'4.0.0', date:'2025-11-01', author:'brea', bg:'#fff1f2' },
+      { type:'tweak', name:'BlurBoost', desc:'Sharper blur performance.', ver:'1.0.0', date:'2025-11-12', author:'lex', bg:'#f1f0ff' },
+      // Extra tweaks
+      { type:'tweak', name:'DockHider', desc:'Hide the dock until needed.', ver:'0.1.0', date:'2025-02-10', author:'azuki', bg:'#eef7ff' },
+      { type:'tweak', name:'BadgeCounter Pro', desc:'Advanced badge counting.', ver:'1.8.9', date:'2025-03-17', author:'mara', bg:'#fef3c7' },
+      { type:'tweak', name:'StatusGlyph', desc:'Icons in status bar.', ver:'0.6.4', date:'2025-04-04', author:'luke', bg:'#f3f4f6' },
+      // Apps (do nothing; just listed)
+      { type:'app', name:'FileVoyager', desc:'Powerful file browser.', ver:'2.3.0', date:'2025-06-06', author:'wormjb', bg:'#e0f2fe' },
+      { type:'app', name:'TerminaLite', desc:'Lightweight terminal.', ver:'0.9.1', date:'2025-07-07', author:'wormjb', bg:'#f5f3ff' },
+      { type:'app', name:'IconStudio', desc:'Design and export icons.', ver:'1.0.0', date:'2025-08-18', author:'wormjb', bg:'#f3e8ff' },
+      { type:'app', name:'ThemeCraft', desc:'Build themes with ease.', ver:'1.2.0', date:'2025-09-22', author:'wormjb', bg:'#f0fdf4' }
     ];
-    const REPO_DESCS = [
-      'Sleek dock transparency for Home Screen.',
-      'Clear badges with a pull gesture.',
-      'Customize status bar elements.',
-      'True system-wide dark enhancement.',
-      'Fast toggles in Control Center.',
-      'Live battery ring on icons.',
-      'Snap icons to a neat grid.',
-      'Silence camera shutter with a tap.',
-      'Passcode protect chosen apps.',
-      'Round UI corners system-wide.',
-      'Gesture from edges to switch apps.',
-      'Fine-tune haptics feedback.',
-      'Animated lock glyph on unlock.',
-      'Auto-dim screen intelligently.',
-      'Weave custom icon overlays.',
-      'Global tint color control.',
-      'Compact music bar on Home.',
-      'Auto-close annoying popups.',
-      'Extended reachability options.',
-      'Schedule silence times.',
-      'Remove icon drop-shadows.',
-      'Custom images for folders.',
-      'Minimal volume HUD.',
-      'Bouncy spring animations.',
-      'Sharper blur performance.'
-    ];
-    const REPO_AUTHORS = ['azuki','mara','luke','nero','olive','finn','kai','zoe','ian','xeno','vera','noah','gale','ivy','sol','tori','milo','aria','rhett','yuna','zane','dina','quinn','brea','lex'];
-    const REPO_BGS = ['#eef7ff','#fef3c7','#f3f4f6','#1118270d','#ecfccb','#f5f3ff','#e0f2fe','#fef2f2','#f3e8ff','#f0fdf4','#fff7ed','#f1f5f9','#fef9c3','#fafafa','#ffe4e6','#fefce8','#eff6ff','#f0f9ff','#f7fee7','#f8fafc','#f5f5f5','#faf5ff','#f0fdfa','#fff1f2','#f1f0ff'];
-    const DEFAULT_REPO = Array.from({length: REPO_NAMES.length}).map((_,i)=>({
-      id: `tweak.${slugifyName(REPO_NAMES[i])}`,
-      name: REPO_NAMES[i],
-      description: REPO_DESCS[i],
-      author: REPO_AUTHORS[i],
-      version: '1.0.0',
-      date: '2025-11-12',
-      bg: REPO_BGS[i]
+    const DEFAULT_REPO = REPO_ITEMS.map(it => ({
+      id: `${it.type === 'app' ? 'app' : 'tweak'}.${slugifyName(it.name)}`,
+      name: it.name,
+      description: it.desc,
+      author: it.author,
+      version: it.ver,
+      date: it.date,
+      bg: it.bg
     }));
 
     const repoList = document.getElementById('repoList');
@@ -985,7 +1019,7 @@
         /* Scope surface overrides to dark mode only */
         html.dark .ios-card, html.dark .ios-list { background: var(--ios-bg); border-color: var(--ios-border); }
         html.dark .ios-list-item { border-color: var(--ios-border); }
-        html.dark header, html.dark .version, html.dark .tabs { background: var(--ios-bg); border-color: var(--ios-border); color: var(--ios-text-gray); }
+  html.dark header, html.dark .tabs { background: var(--ios-bg); border-color: var(--ios-border); color: var(--ios-text-gray); }
         /* Inputs/buttons get slight dark tweaks in dark mode */
         html.dark .ios-button { background: #2563eb; color: #fff; }
         html.dark .ios-button.danger { background: #ef4444; }
@@ -1101,67 +1135,20 @@
       }
     }
 
-    // ---------- wormJB action helpers ----------
-    function setStatus(msg) {
-      const el = document.getElementById('statusText');
-      if (el) el.textContent = 'Status: ' + msg;
-    }
-
-    function buildReJailbreakCommands(clean) {
-      const cmds = [];
-      if (clean) cmds.push('wormjb revert || true');
-      cmds.push('cd ~/Documents');
-      cmds.push('rm -rf wormJB');
-      cmds.push('git clone https://github.com/wheatbread2056/wormJB');
-      cmds.push('cd wormJB');
-      cmds.push('sh jb/main.sh');
-      return cmds;
-    }
-
-    function openInAShell(commandsArray) {
-      // Combine commands using && so failure stops chain
-      const joined = commandsArray.join(' && ');
-      // URL scheme guess for A-Shell. If different, adjust run?cmd= parameter.
-      const url = 'ashell://run?command=' + encodeURIComponent(joined);
-      // Attempt navigation
-      setStatus('Launching A-Shell...');
-      // Copy to clipboard for fallback/paste
-      try {
-        navigator.clipboard.writeText(joined);
-      } catch (e) {
-        // ignore
-      }
-      // Navigate
-      window.location.href = url;
-      // Provide alert info
-      showAlert('Attempted to launch A-Shell. If it did not open, paste commands manually (already copied).');
-    }
-
     function wireButtons() {
-      const reBtn = document.getElementById('reJBBtn');
-      const cleanToggle = document.getElementById('cleanReJB');
       const removeBtn = document.getElementById('removeJBBtn');
       const sideStoreBtn = document.getElementById('installSideStoreBtn');
       const repoBtn = document.getElementById('openRepoBtn');
       const showScriptBtn = document.getElementById('showScriptBtn');
       const openTermBtn = document.getElementById('openTerminalBtn');
       const mysteryBtn = document.getElementById('mysteryBtn');
-
-      if (reBtn) reBtn.addEventListener('click', () => {
-        const cmds = buildReJailbreakCommands(cleanToggle && cleanToggle.checked);
-        setStatus('couldnt figure out how to open commands in a shell so just do it yourself.');
-        showAlert("I apologize");
-      });
       if (removeBtn) removeBtn.addEventListener('click', () => {
-        setStatus('ts doesnt work');
         showAlert("I apologize");
       });
       if (sideStoreBtn) sideStoreBtn.addEventListener('click', () => {
-        setStatus('Opening SideStore site...');
         window.open('https://sidestore.io#get-started', '_blank');
       });
       if (repoBtn) repoBtn.addEventListener('click', () => {
-        setStatus('Opening repo...');
         window.open('https://github.com/wheatbread2056/wormJB', '_blank');
       });
       if (showScriptBtn) showScriptBtn.addEventListener('click', () => {
@@ -1176,6 +1163,27 @@
       });
     }
     wireButtons();
+
+    // Device hash copy wiring
+    function getDeviceHash() {
+      let h = localStorage.getItem('wormjb_device_hash');
+      if (!h) {
+        // generate a 16-digit string with first digit 1-9
+        h = String(Math.floor(Math.random()*9)+1);
+        for (let i=0;i<15;i++) h += Math.floor(Math.random()*10);
+        localStorage.setItem('wormjb_device_hash', h);
+      }
+      return h;
+    }
+    (function setupCopyHash(){
+      const btn = document.getElementById('copyHashBtn');
+      if (!btn) return;
+      btn.addEventListener('click', async ()=>{
+        const h = getDeviceHash();
+        try { await navigator.clipboard.writeText(h); showAlert('Copied device hash: ' + h); }
+        catch { showAlert('Device hash: ' + h); }
+      });
+    })();
 
     // Disable Dev Mode button
     (function setupDisableDevMode() {
