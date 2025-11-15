@@ -390,22 +390,28 @@
                 <input id="themeFontOther" class="ios-input" placeholder="Font-family (e.g. 'Roboto')" style="display:none; width:160px;" />
               </div>
             </div>
-            <div style="display:flex; gap:.75rem; align-items:center; width:100%;">
-              <div style="display:flex; align-items:center; gap:0.5rem;">
-                <span style="font-size:0.95rem;">Disable Music</span>
-                <label class="ios-switch"><input type="checkbox" id="musicDisableToggle"><span class="slider"></span></label>
-              </div>
-              <div style="display:flex; align-items:center; gap:0.5rem;">
-                <span style="font-size:0.95rem;">Tall Tabs (notched)</span>
-                <label class="ios-switch"><input type="checkbox" id="tabsNotchToggle"><span class="slider"></span></label>
-              </div>
-            </div>
+          </div>
+          <div class="ios-list-item">
+            <span>Disable Music</span>
+            <label class="ios-switch"><input type="checkbox" id="musicDisableToggle"><span class="slider"></span></label>
+          </div>
+          <div class="ios-list-item">
+            <span>Tall Tabs (notched)</span>
+            <label class="ios-switch"><input type="checkbox" id="tabsNotchToggle"><span class="slider"></span></label>
           </div>
         </div>
       </div>
       <div class="ios-card">
         <h3>System Info</h3>
-        <div class="ios-list" id="sysInfo" style="padding:1rem; font-family:monospace; font-size:0.9rem;"></div>
+        <div class="ios-list" style="padding:0;">
+          <div id="sysInfoList">
+            <div class="ios-list-item"><span>Version</span><span id="sysVersion" class="status-pill status-green">—</span></div>
+            <div class="ios-list-item"><span>Device</span><span id="sysDevice" class="status-pill status-green">—</span></div>
+          </div>
+        </div>
+        <div id="sysUnsupportedCard" class="ios-card" style="display:none; margin-top:.5rem;">
+          <div style="padding:1rem; color:var(--ios-text-gray);">Device is not supported. WormJB is running in testing mode.</div>
+        </div>
       </div>
       <div class="ios-card">
         <h3>Credits</h3>
@@ -964,20 +970,34 @@
     const backFromBrowserBtn = document.getElementById('backFromBrowserBtn');
     if (backFromBrowserBtn) backFromBrowserBtn.addEventListener('click', () => switchTab('tweaks'));
 
-    // System info rendering
+    // System info rendering (status-style list). Shows Version (parsed from UA) and Platform as Device when UA contains "Mobile/".
     (function renderSystemInfo(){
-      const el = document.getElementById('sysInfo');
-      if (!el) return;
-      const nav = navigator;
-      const lines = [];
-      lines.push('User Agent: ' + nav.userAgent);
-      lines.push('Platform: ' + (nav.platform || ''));
-      lines.push('Language: ' + (nav.language || ''));
-      lines.push('Cores: ' + (nav.hardwareConcurrency || 'n/a'));
-      lines.push('Memory: ' + ((nav.deviceMemory && (nav.deviceMemory+' GB')) || 'n/a'));
-      lines.push('Screen: ' + screen.width + 'x' + screen.height + ' @' + (window.devicePixelRatio||1) + 'x');
-      lines.push('Timezone: ' + Intl.DateTimeFormat().resolvedOptions().timeZone);
-      el.textContent = lines.join('\n');
+      const ua = navigator.userAgent || '';
+      const list = document.getElementById('sysInfoList');
+      const verEl = document.getElementById('sysVersion');
+      const devEl = document.getElementById('sysDevice');
+      const unsupportedCard = document.getElementById('sysUnsupportedCard');
+      if (!list || !verEl || !devEl || !unsupportedCard) return;
+      // Show parsed info only for Mobile user agents
+      if (ua.indexOf('Mobile/') !== -1) {
+        // parse Version/.. from UA
+        let version = 'Unknown';
+        const vIdx = ua.indexOf('Version/');
+        if (vIdx !== -1) {
+          const after = ua.slice(vIdx + 8);
+          const m = after.match(/^([^\s;]+)/);
+          version = m ? m[1] : after.split(' ')[0];
+        }
+        const device = navigator.platform || 'Unknown';
+        verEl.textContent = version;
+        devEl.textContent = device;
+        list.style.display = 'block';
+        unsupportedCard.style.display = 'none';
+      } else {
+        // unsupported device: hide the status list and show a friendly card
+        list.style.display = 'none';
+        unsupportedCard.style.display = 'block';
+      }
     })();
 
     // Import/Export data
