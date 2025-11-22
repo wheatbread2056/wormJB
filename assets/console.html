@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
 <title>WormJB Console</title>
 <style>
-:root { --bg:#0d0f11; --fg:#e5e7eb; --accent:#34d399; --err:#ef4444; --warn:#f59e0b; --info:#60a5fa; --muted:#6b7280; --bar-offset:0px; }
+:root { --bg:#0d0f11; --fg:#e5e7eb; --accent:#34d399; --err:#ef4444; --warn:#f59e0b; --info:#60a5fa; --muted:#6b7280; --bar-offset:0px; --keyboard-offset:0px; }
 html.light { --bg:#ffffff; --fg:#111827; --accent:#2563eb; --err:#dc2626; --warn:#d97706; --info:#1d4ed8; --muted:#475569; }
 * { box-sizing:border-box; }
 body { margin:0; font:16px/1.35 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace; background:var(--bg); color:var(--fg); height:100dvh; display:flex; flex-direction:column; -webkit-text-size-adjust:100%; touch-action:manipulation; }
-#terminal { flex:1 1 auto; overflow-y:auto; padding:58px 10px 96px; /* top space for toolbar */ word-wrap:break-word; }
+#terminal { flex:1 1 auto; overflow-y:auto; padding:58px 10px calc(96px + var(--keyboard-offset)); /* top space for toolbar */ word-wrap:break-word; }
 .line { margin:0 0 4px; white-space:pre-wrap; }
 .prompt-span { color:var(--accent); }
 .time { color:var(--info); }
@@ -17,7 +17,7 @@ body { margin:0; font:16px/1.35 ui-monospace, SFMono-Regular, Menlo, Monaco, Con
 .warn { color:var(--warn); }
 .muted { color:var(--muted); }
 .result { color:var(--accent); }
-#inputWrap { position:fixed; left:0; right:0; bottom:var(--bar-offset); background:rgba(0,0,0,0.35); backdrop-filter:blur(10px); padding:10px 12px; display:flex; align-items:center; gap:8px; }
+#inputWrap { position:fixed; left:0; right:0; bottom:calc(var(--bar-offset) + var(--keyboard-offset)); background:rgba(0,0,0,0.35); backdrop-filter:blur(10px); padding:10px 12px; display:flex; align-items:center; gap:8px; }
 html.light #inputWrap { background:rgba(255,255,255,0.7); }
 #cmdInput { flex:1; min-height:42px; max-height:160px; resize:none; border:1px solid var(--muted); background:var(--bg); color:var(--fg); border-radius:10px; padding:10px 12px; font:16px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace; line-height:1.3; }
 #buttonsWrap { display:flex; gap:10px; }
@@ -42,7 +42,7 @@ a { color:var(--info); text-decoration:none; }
 </div>
 <div id="terminal"></div>
 <div id="inputWrap">
-  <textarea id="cmdInput" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Enter JS or command (help)"></textarea>
+  <textarea id="cmdInput" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Enter JS"></textarea>
   <div id="buttonsWrap">
     <button id="runBtn" class="circle-btn" aria-label="Run">▶</button>
     <button id="histPrevBtn" class="circle-btn secondary" aria-label="Prev">▲</button>
@@ -65,6 +65,58 @@ a { color:var(--info); text-decoration:none; }
   let theme = (localStorage.getItem('wormjb_console_theme')||'dark');
   if(theme==='light') document.documentElement.classList.add('light');
   const timers = new Map();
+  const root = document.documentElement;
+  const wormFileManifest = {
+    '/index.html':'../index.html',
+    '/README.md':'../README.md',
+    '/assets/console.html':'./console.html',
+    '/jb/main.sh':'../jb/main.sh',
+    '/jb/liquidra1n.sh':'../jb/liquidra1n.sh',
+    '/jb/WormJB.mobileconfig':'../jb/WormJB.mobileconfig',
+    '/jb/loader/hookworm.sh':'../jb/loader/hookworm.sh',
+    '/jb/loader/modules/test.sh':'../jb/loader/modules/test.sh',
+    '/tools/apt.sh':'../tools/apt.sh',
+    '/tools/ashellfetch.sh':'../tools/ashellfetch.sh',
+    '/tools/worm.sh':'../tools/worm.sh',
+    '/tools/wormjb.sh':'../tools/wormjb.sh'
+  };
+  const manifestPaths = Object.keys(wormFileManifest);
+  function normalizePath(input){
+    if(!input) return '/';
+    let normalized = input.trim();
+    if(!normalized.startsWith('/')) normalized = '/' + normalized;
+    if(normalized.length>1 && normalized.endsWith('/')) normalized = normalized.slice(0,-1);
+    return normalized || '/';
+  }
+  function directoryEntries(path){
+    const normalized = normalizePath(path);
+    const prefix = normalized === '/' ? '/' : normalized + '/';
+    let hasMatch = normalized === '/';
+    const children = new Map();
+    manifestPaths.forEach(fp=>{
+      if(fp === normalized) hasMatch = true;
+      if(normalized !== '/' && !fp.startsWith(prefix)) return;
+      if(normalized !== '/') hasMatch = true;
+      if(normalized === '/' && fp === '/') return;
+      const relative = normalized === '/' ? fp.slice(1) : fp.slice(prefix.length);
+      if(!relative) return;
+      const segments = relative.split('/');
+      const name = segments[0];
+      if(!name) return;
+      const isDir = segments.length>1;
+      const childPath = normalized === '/' ? '/' + name : normalized + '/' + name;
+      if(children.has(name)) return;
+      children.set(name, { name: name + (isDir?'/':''), path: childPath, type: isDir?'dir':'file' });
+    });
+    if(!hasMatch && children.size===0) return null;
+    return Array.from(children.values()).sort((a,b)=>{
+      if(a.type === b.type) return a.name.localeCompare(b.name);
+      return a.type === 'dir' ? -1 : 1;
+    });
+  }
+  const viewport = window.visualViewport;
+  let focusScrollY = 0;
+  let keyboardLock = false;
 
   function saveHistory(){ try { localStorage.setItem(historyKey, JSON.stringify(history.slice(-200))); } catch(e){} }
   function esc(s){ return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
@@ -75,6 +127,36 @@ a { color:var(--info); text-decoration:none; }
     print('<span class="muted">Type <b>help</b> for commands. Type <b>exit</b> to return.</span>');
     print('');
   }
+  function updateKeyboardOffset(){
+    if(!viewport) return;
+    const keyboard = Math.max(0, (window.innerHeight - viewport.height - viewport.offsetTop));
+    const eased = keyboard > 0 ? keyboard + 8 : 0;
+    root.style.setProperty('--keyboard-offset', eased + 'px');
+    if(keyboard>0){
+      term.scrollTop = term.scrollHeight;
+    }
+  }
+  if(viewport){
+    viewport.addEventListener('resize', updateKeyboardOffset);
+    viewport.addEventListener('scroll', updateKeyboardOffset);
+  }
+  input.addEventListener('focus',()=>{
+    focusScrollY = window.scrollY || document.documentElement.scrollTop || 0;
+    keyboardLock = true;
+    setTimeout(()=>window.scrollTo(0, focusScrollY), 0);
+    updateKeyboardOffset();
+  });
+  input.addEventListener('blur',()=>{
+    keyboardLock = false;
+    focusScrollY = 0;
+    root.style.setProperty('--keyboard-offset','0px');
+  });
+  window.addEventListener('scroll',()=>{
+    if(!keyboardLock) return;
+    if(Math.abs(window.scrollY - focusScrollY) > 2){
+      window.scrollTo(0, focusScrollY);
+    }
+  }, { passive:true });
   function formatValue(v, depth=0){
     if(v===null) return 'null';
     if(v===undefined) return 'undefined';
@@ -88,6 +170,100 @@ a { color:var(--info); text-decoration:none; }
       return '{'+keys.slice(0,25).map(k=>esc(k)+': '+formatValue(v[k], depth+1)).join(', ')+(keys.length>25?' …':'')+'}';
     }
     try { return esc(String(v)); } catch(e){ return esc('[Unformattable]'); }
+  }
+  function ensureFilePath(path){
+    const normalized = normalizePath(path);
+    if(!wormFileManifest[normalized]) return null;
+    return normalized;
+  }
+  async function readFileFromManifest(path){
+    const normalized = ensureFilePath(path);
+    if(!normalized){ print('Unknown file: '+esc(path),'warn'); return; }
+    try {
+      const res = await fetch(wormFileManifest[normalized]);
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      const text = await res.text();
+      print('<span class="muted">'+esc(normalized)+'</span>');
+      print('<pre class="chunk-note" style="white-space:pre-wrap;font-family:inherit;">'+esc(text)+'</pre>');
+    } catch(e){
+      print('Read error: '+esc(e.message||String(e)),'error');
+    }
+  }
+  function listDirectory(path){
+    const normalized = normalizePath(path);
+    if(wormFileManifest[normalized]){
+      print('file\u00a0'+esc(normalized));
+      return;
+    }
+    const entries = directoryEntries(normalized);
+    if(entries === null){ print('Unknown path: '+esc(path),'warn'); return; }
+    if(entries.length===0){ print('Empty directory','muted'); return; }
+    entries.forEach(entry=>{
+      const prefix = entry.type==='dir' ? 'dir ' : 'file';
+      print(prefix+'\u00a0'+esc(entry.path));
+    });
+  }
+  function listDataKeys(){
+    const keys=[];
+    for(let i=0;i<localStorage.length;i++) keys.push(localStorage.key(i));
+    if(!keys.length){ print('No local data found','muted'); return; }
+    print('Stored keys ('+keys.length+'): '+esc(keys.join(', ')),'info');
+  }
+  function getDataValue(key){
+    if(!key){ print('Usage: data get <key>','warn'); return; }
+    const raw = localStorage.getItem(key);
+    if(raw===null){ print('No value for '+esc(key),'warn'); return; }
+    try {
+      const parsed = JSON.parse(raw);
+      print(formatValue(parsed),'result');
+    } catch(e){
+      print(esc(raw),'result');
+    }
+  }
+  function setDataValue(key, value){
+    if(!key){ print('Usage: data set <key> <value>','warn'); return; }
+    localStorage.setItem(key, value);
+    print('Saved '+esc(key),'info');
+  }
+  function deleteDataValue(key){
+    if(!key){ print('Usage: data del <key>','warn'); return; }
+    localStorage.removeItem(key);
+    print('Deleted '+esc(key),'info');
+  }
+  function guid(){
+    if(window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    const template = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx';
+    return template.replace(/[xy]/g,c=>{
+      const r=Math.random()*16|0, v=c==='x'?r:(r&0x3|0x8);
+      return v.toString(16);
+    });
+  }
+  async function mobileConfigWizard(){
+    try {
+      const profileName = prompt('Profile name','WormJB Remote Console');
+      if(!profileName){ print('mobileconfig cancelled','warn'); return; }
+      const identifier = prompt('Profile identifier','com.wormjb.console') || 'com.wormjb.console';
+      const organization = prompt('Organization','WormJB Team') || 'WormJB Team';
+      const webclipLabel = prompt('WebClip label','WormJB Console') || 'WormJB Console';
+      const webclipURL = prompt('WebClip URL','https://wormjb.local/console') || 'https://wormjb.local/console';
+      const payloadUUID = guid();
+      const profileUUID = guid();
+      const now = new Date().toISOString();
+      const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n<plist version="1.0">\n<dict>\n  <key>PayloadContent</key>\n  <array>\n    <dict>\n      <key>FullScreen</key><true/>\n      <key>Icon</key><data></data>\n      <key>IsRemovable</key><true/>\n      <key>Label</key><string>${webclipLabel}</string>\n      <key>PayloadDescription</key><string>Quick launch for WormJB Console</string>\n      <key>PayloadDisplayName</key><string>WormJB Console Clip</string>\n      <key>PayloadIdentifier</key><string>${identifier}.webclip</string>\n      <key>PayloadOrganization</key><string>${organization}</string>\n      <key>PayloadType</key><string>com.apple.webClip.managed</string>\n      <key>PayloadUUID</key><string>${payloadUUID}</string>\n      <key>PayloadVersion</key><integer>1</integer>\n      <key>Precomposed</key><true/>\n      <key>URL</key><string>${webclipURL}</string>\n    </dict>\n  </array>\n  <key>PayloadDescription</key><string>Generated ${now}</string>\n  <key>PayloadDisplayName</key><string>${profileName}</string>\n  <key>PayloadIdentifier</key><string>${identifier}</string>\n  <key>PayloadOrganization</key><string>${organization}</string>\n  <key>PayloadRemovalDisallowed</key><false/>\n  <key>PayloadType</key><string>Configuration</string>\n  <key>PayloadUUID</key><string>${profileUUID}</string>\n  <key>PayloadVersion</key><integer>1</integer>\n</dict>\n</plist>`;
+      const blob = new Blob([xml], { type: 'application/x-apple-aspen-config' });
+      const downloadName = profileName.trim().replace(/\s+/g,'_') + '.mobileconfig';
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = downloadName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url), 1500);
+      print('Generated '+esc(downloadName),'info');
+    } catch(e){
+      print('Generator failed: '+esc(e.message||String(e)),'error');
+    }
   }
   async function runJS(code){
     try {
@@ -110,6 +286,11 @@ a { color:var(--info); text-decoration:none; }
     print('<b>timeEnd &lt;label&gt;</b> - end timer');
     print('<b>load &lt;url&gt;</b> - fetch & eval remote JS');
     print('<b>inspect &lt;expr&gt;</b> - detailed object dump');
+    print('<b>files</b> - WormJB file utilities');
+    print('<b>files ls [path]</b> - list bundled files');
+    print('<b>cat &lt;path&gt;</b> - view a file');
+    print('<b>data list|get|set|del</b> - manage stored data');
+    print('<b>mobileconfig</b> - generate an iOS profile');
     print('<b>ls &lt;expr&gt;</b> - list enumerable keys');
     print('<b>theme &lt;dark|light&gt;</b> - switch console theme');
     print('<b>copy</b> - copy last result');
@@ -126,6 +307,33 @@ a { color:var(--info); text-decoration:none; }
     if(trimmed.startsWith('timeEnd ')){ const label=trimmed.slice(8); if(timers.has(label)){ const ms=performance.now()-timers.get(label); timers.delete(label); print(label+': '+ms.toFixed(2)+'ms','time'); } else { print('No active timer '+esc(label),'warn'); } return; }
     if(trimmed.startsWith('load ')){ const url=trimmed.slice(5).trim(); try { const res= await fetch(url); if(!res.ok) throw new Error('HTTP '+res.status); const txt= await res.text(); print('Loaded '+esc(url)+' ('+txt.length+' bytes)','info'); await runJS(txt); } catch(e){ print('Load error: '+esc(e.message||String(e)),'error'); } return; }
     if(trimmed.startsWith('inspect ')){ const expr=trimmed.slice(8); try { const val=eval(expr); print(formatValue(val,0),'result'); } catch(e){ print('Inspect error: '+esc(e.message||String(e)),'error'); } return; }
+    if(trimmed==='files'){ listDirectory('/'); print('Use "files ls <path>" or "cat <path>"', 'muted'); return; }
+    if(trimmed.startsWith('files ')){
+      const [,sub,...rest] = trimmed.split(/\s+/);
+      if(sub==='ls'){
+        const target = rest.join(' ') || '/';
+        listDirectory(target);
+      } else {
+        print('files commands: ls <path>','warn');
+      }
+      return;
+    }
+    if(trimmed.startsWith('cat ')){ const path = trimmed.slice(4).trim(); if(!path){ print('Usage: cat <path>','warn'); } else { await readFileFromManifest(path); } return; }
+    if(trimmed==='data list'){ listDataKeys(); return; }
+    if(trimmed.startsWith('data get ')){ const key=trimmed.slice(9).trim(); getDataValue(key); return; }
+    if(trimmed.startsWith('data set ')){
+      const pair = trimmed.slice(9).trim();
+      const spaceIndex = pair.indexOf(' ');
+      if(spaceIndex === -1){ print('Usage: data set <key> <value>','warn'); }
+      else {
+        const key = pair.slice(0, spaceIndex);
+        const value = pair.slice(spaceIndex+1);
+        setDataValue(key, value);
+      }
+      return;
+    }
+    if(trimmed.startsWith('data del ')){ const key=trimmed.slice(9).trim(); deleteDataValue(key); return; }
+    if(trimmed==='mobileconfig'){ await mobileConfigWizard(); return; }
     if(trimmed.startsWith('ls ')){ const expr=trimmed.slice(3); try { const val=eval(expr); const keys=[]; for(const k in val) keys.push(k); print('Keys('+keys.length+'): '+esc(keys.join(', ')),'result'); } catch(e){ print('ls error: '+esc(e.message||String(e)),'error'); } return; }
     if(trimmed.startsWith('theme ')){ const mode=trimmed.slice(6).trim(); if(mode==='dark'||mode==='light'){ document.documentElement.classList.toggle('light', mode==='light'); theme=mode; localStorage.setItem('wormjb_console_theme', mode); print('Theme set to '+mode,'info'); } else { print('Theme must be dark|light','warn'); } return; }
     if(trimmed==='copy'){ if(lastResult===undefined){ print('Nothing to copy','warn'); return; } try { const txt=(typeof lastResult==='string')? lastResult : (typeof lastResult==='object'? JSON.stringify(lastResult,null,2): String(lastResult)); await navigator.clipboard.writeText(txt); print('Copied','info'); } catch(e){ print('Copy failed','error'); } return; }
