@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>WormJB</title>
   <script>
-    const APP_VERSION = 'v1.0.rc1';
+    const APP_VERSION = 'v1.0.rc2';
   </script>
   <style>
     :root {
@@ -43,18 +43,20 @@
     }
     header {
       position: fixed; top: 0; left: 0; right: 0;
-      height: 56px; display: flex; align-items: center; justify-content: center;
+      height: calc(56px + env(safe-area-inset-top, 0px));
+      padding-top: env(safe-area-inset-top, 0px);
+      display: flex; align-items: center; justify-content: center;
       font-weight: 600; font-size: 1.2rem;
       border-bottom: 1px solid var(--ios-border);
       background: white; z-index: 10;
     }
     .version {
-      position: fixed; top: 56px; width: 100%; text-align: center;
+      position: fixed; top: calc(56px + env(safe-area-inset-top, 0px)); width: 100%; text-align: center;
       font-size: 0.8rem; color: var(--ios-text-gray); background: white; padding: 0.3rem 0;
       z-index: 9;
     }
     main {
-      position: absolute; top: 84px; bottom: 60px; left: 0; right: 0;
+      position: absolute; top: calc(84px + env(safe-area-inset-top, 0px)); bottom: 60px; left: 0; right: 0;
       overflow-y: auto; -webkit-overflow-scrolling: touch;
       background: var(--ios-bg);
       padding: 1rem; box-sizing: border-box;
@@ -230,6 +232,8 @@
       display: flex; border-top: 1px solid var(--ios-border);
       background: white; height: 60px; z-index: 10;
       backdrop-filter: blur(12px);
+      isolation: isolate;
+      overflow: visible;
     }
     .tab {
       flex: 1; display: flex; flex-direction: column;
@@ -272,17 +276,28 @@
 
     /* Tweak list layout stability */
     .tweak-left {
-      display: flex; flex-direction: column; flex: 1 1 auto; min-width: 0; /* allow ellipsis */
+      display: flex; flex-direction: column; flex: 1 1 auto; min-width: 0;
     }
   .tweak-title-row { display:flex; align-items:center; justify-content:space-between; gap:.75rem; min-width:0; width:100%; }
   .tweak-name { font-size:1rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1 1 auto; min-width:0; }
-  .tweak-id { color: var(--ios-text-gray); white-space:nowrap; text-align:right; flex:0 0 auto; max-width:55%; overflow:hidden; text-overflow:ellipsis; }
   .tweak-desc { color: var(--ios-text-gray); margin-top:0.25rem; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; line-clamp:2; -webkit-box-orient:vertical; }
     .tweak-meta { color: var(--ios-text-gray); font-size:0.85rem; margin-top:0.35rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
   /* Header username color uses variable for proper dark/light contrast */
     #headerUsername { color: var(--ios-text-gray); }
     .tweak-right { display:flex; align-items:center; gap:.5rem; flex: 0 0 auto; }
+  .tweak-id-floating {
+    position:absolute;
+    top:0.55rem;
+    right:0.75rem;
+    font-size:0.85rem;
+    color: var(--ios-text-gray);
+    white-space:nowrap;
+    max-width:45%;
+    text-overflow:ellipsis;
+    overflow:hidden;
+    text-align:right;
+  }
 
   /* Version pill next to title */
   .version-pill { border: 1px solid var(--ios-border); color: var(--ios-text-gray); border-radius: 9999px; padding: 0.05rem 0.5rem; font-size: 0.8rem; font-weight: 500; }
@@ -330,6 +345,21 @@
     .profile-upload input[type="file"] { padding:0.5rem; background:#fff; border-radius:12px; border:1px dashed rgba(0,0,0,0.15); }
     html.dark .profile-upload input[type="file"] { background:#111315; border-color: rgba(255,255,255,0.2); color:#e5e7eb; }
 
+    .credits-card { overflow:hidden; }
+    .credits-header { margin-bottom:0.75rem; }
+    .credits-subtitle { color: var(--ios-text-gray); margin:0.2rem 0 0; }
+    .credits-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:0.75rem; }
+    .credit-item {
+      padding:0.85rem;
+      border-radius:14px;
+      background: #f5f5f7;
+      border:1px solid rgba(0,0,0,0.05);
+      display:flex; flex-direction:column; gap:0.2rem;
+    }
+    .credit-label { font-size:0.78rem; text-transform:uppercase; letter-spacing:0.12em; color: var(--ios-text-gray); }
+    .credit-value { font-weight:600; }
+    html.dark .credit-item { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.08); }
+
     /* Glass mode */
     html.glass-mode body {
       background: radial-gradient(circle at top, rgba(99,102,241,0.25), transparent 60%),
@@ -350,17 +380,47 @@
     html.glass-mode .ios-card,
     html.glass-mode .ios-list { border:1px solid var(--glass-border); }
   html.glass-mode .ios-list-item { background: transparent; border-color: var(--glass-border); }
+  html.glass-mode .profile-hero { background: linear-gradient(135deg, rgba(99,102,241,0.45), rgba(139,92,246,0.3)); box-shadow: var(--glass-shadow); }
+  html.dark.glass-mode .profile-hero { background: linear-gradient(135deg, rgba(67,56,202,0.65), rgba(124,58,237,0.5)); }
+  html.glass-mode .sys-info-item,
+  html.glass-mode .credit-item,
+  html.glass-mode .sys-testing-panel,
+  html.glass-mode .profile-upload input[type="file"] {
+    background: var(--glass-surface);
+    border-color: var(--glass-border);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.35);
+    backdrop-filter: saturate(160%) blur(22px);
+    -webkit-backdrop-filter: saturate(160%) blur(22px);
+  }
+  html.glass-mode .credit-item,
+  html.glass-mode .sys-info-item { color: inherit; }
+  html.glass-mode .sys-testing-panel { color:#1f2937; }
+  html.dark.glass-mode .sys-testing-panel { color:#e5e7eb; }
     html.glass-mode .tabs {
-      border-top:1px solid var(--glass-border);
+      border-top: none;
       border-radius:32px;
       width:calc(100% - 2rem);
       left:50%;
       transform:translateX(-50%);
       right:auto;
       bottom:18px;
-      box-shadow:var(--glass-shadow);
+      box-shadow: none;
+      background: transparent !important;
     }
-  html.glass-mode .tabs.tall { bottom:32px; }
+    html.glass-mode .tabs::before {
+      content:"";
+      position:absolute;
+      inset:0;
+      border-radius:inherit;
+      background: var(--glass-surface);
+      border:1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+      backdrop-filter: saturate(160%) blur(22px);
+      -webkit-backdrop-filter: saturate(160%) blur(22px);
+      z-index:-1;
+    }
+  html.glass-mode .tabs.tall { bottom:32px; height:60px; }
+  html.glass-mode .tabs.tall .tab { justify-content:center; padding-top:0; }
   html.glass-mode main { background: transparent; }
   </style>
   <!-- Early theme bootstrap to avoid flash and ensure variables are set before paint -->
@@ -424,10 +484,9 @@
           <div class="ios-list-item" style="padding:.6rem;">
             <button class="ios-button" id="mysteryBtn" style="width:100%;">Do Nothing</button>
           </div>
-        </div>
-
-        <div style="margin-top:.75rem; display:flex; gap:.5rem; align-items:center;">
-          <button class="ios-button magenta" id="audioToggleBtn">Enable Ambient Sound</button>
+          <div class="ios-list-item" style="padding:.6rem;">
+            <button class="ios-button" id="copyHashBtn" style="width:100%;">Copy WormJB Device Hash</button>
+          </div>
         </div>
       </div>
       <div class="ios-card">
@@ -441,9 +500,6 @@
           <div class="status-row"><span>WormJB</span><span class="status-pill status-green">True</span></div>
           <div class="status-row"><span>Root Access</span><span class="status-pill status-green">True</span></div>
           <div class="status-row"><span>Made with</span><span class="status-pill status-magenta">love</span></div>
-        </div>
-        <div style="display:flex; justify-content:center; margin-top:.75rem;">
-          <button class="ios-button" id="copyHashBtn">Copy WormJB Device Hash</button>
         </div>
       </div>
     </section>
@@ -678,15 +734,36 @@
           </ul>
         </div>
       </div>
-      <div class="ios-card">
-        <h3>Credits</h3>
-        <div class="ios-list" style="padding:1rem; line-height:1.5;">
-          <div><strong>Founder:</strong> wheatbread2056 aka brainworm</div>
-          <div><strong>Lead Developer:</strong> GPT-5 by OpenAI</div>
-          <div><strong>Developer:</strong> wheatbread2056</div>
-          <div><strong>Inspiration:</strong> cydia gold edition team</div>
-          <div><strong>License:</strong> No license because nobody needs licenses.</div>
-          <div><strong>App Version:</strong> <span id="creditsVersion">—</span></div>
+      <div class="ios-card credits-card">
+        <div class="credits-header">
+          <h3 style="margin-bottom:0.25rem;">Credits</h3>
+          <p class="credits-subtitle">WormJB exists thanks to this small roster of obsessives.</p>
+        </div>
+        <div class="credits-grid">
+          <div class="credit-item">
+            <span class="credit-label">Founder</span>
+            <span class="credit-value">wheatbread2056 · brainworm</span>
+          </div>
+          <div class="credit-item">
+            <span class="credit-label">Lead Developer</span>
+            <span class="credit-value">GPT-5 · OpenAI</span>
+          </div>
+          <div class="credit-item">
+            <span class="credit-label">Engineering</span>
+            <span class="credit-value">wheatbread2056</span>
+          </div>
+          <div class="credit-item">
+            <span class="credit-label">Inspiration</span>
+            <span class="credit-value">cydia gold edition team</span>
+          </div>
+          <div class="credit-item">
+            <span class="credit-label">License</span>
+            <span class="credit-value">None. Chaos only.</span>
+          </div>
+          <div class="credit-item">
+            <span class="credit-label">App Version</span>
+            <span class="credit-value" id="creditsVersion">—</span>
+          </div>
         </div>
       </div>
     </section>
@@ -991,7 +1068,6 @@
         left.innerHTML = `
           <div class="tweak-title-row">
             <strong class="tweak-name">${escapeHtml(t.name)}</strong>
-            <small class="tweak-id">${escapeHtml(t.id)}</small>
           </div>
           <div class="tweak-desc">${escapeHtml(t.description)}</div>
           <div class="tweak-meta">By ${escapeHtml(t.author)} • v${escapeHtml(t.version)} • ${escapeHtml(t.date)}</div>
@@ -999,6 +1075,13 @@
 
   const right = document.createElement('div');
   right.className = 'tweak-right';
+
+  item.style.position = 'relative';
+  const idTag = document.createElement('div');
+  idTag.className = 'tweak-id-floating';
+  idTag.textContent = t.id || '';
+  idTag.title = t.id || '';
+  item.appendChild(idTag);
 
         const label = document.createElement('label');
         label.className = 'ios-switch';
@@ -1548,13 +1631,15 @@
       const tabBarEl = document.getElementById('tab-bar');
       const mainEl = document.querySelector('main');
       if (!tabBarEl || !mainEl) return;
-      if (enabled) {
-        tabBarEl.classList.add('tall');
-        // Match main bottom padding exactly to tall tab bar height to avoid white gap overlap
-        mainEl.style.bottom = '80px';
+      tabBarEl.classList.toggle('tall', !!enabled);
+      const glassActive = document.documentElement.classList.contains('glass-mode');
+      if (glassActive) {
+  const pad = enabled ? 108 : 92;
+  mainEl.style.bottom = '0px';
+  mainEl.style.paddingBottom = `calc(${pad}px + env(safe-area-inset-bottom, 0px))`;
       } else {
-        tabBarEl.classList.remove('tall');
-        mainEl.style.bottom = '60px';
+        mainEl.style.paddingBottom = '';
+        mainEl.style.bottom = enabled ? '80px' : '60px';
       }
     }
 
@@ -1869,7 +1954,7 @@
         const left = document.createElement('div');
         left.className = 'tweak-left';
         left.innerHTML = `
-          <div class="tweak-title-row"><strong class="tweak-name">${escapeHtml(t.name)}</strong><small class="tweak-id">${escapeHtml(t.id)}</small></div>
+          <div class="tweak-title-row"><strong class="tweak-name">${escapeHtml(t.name)}</strong></div>
           <div class="tweak-desc">${escapeHtml(t.description)}</div>
           <div class="tweak-meta">By ${escapeHtml(t.author)} • v${escapeHtml(t.version)} • ${escapeHtml(t.date)}</div>
         `;
@@ -1887,8 +1972,14 @@
           renderTweaks();
         });
         right.appendChild(installBtn);
-        row.appendChild(left);
-        row.appendChild(right);
+  row.style.position = 'relative';
+  const idTag = document.createElement('div');
+  idTag.className = 'tweak-id-floating';
+  idTag.textContent = t.id || '';
+  idTag.title = t.id || '';
+  row.appendChild(left);
+  row.appendChild(right);
+  row.appendChild(idTag);
         prepareAnimatedListItem(row, idx);
         repoItemsListEl.appendChild(row);
       });
