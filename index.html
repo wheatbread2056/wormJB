@@ -6,6 +6,9 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>WormJB</title>
+  <script>
+    const APP_VERSION = 'v0.5.6';
+  </script>
   <style>
     :root {
       --ios-blue: #007aff;
@@ -22,6 +25,7 @@
       color: #000;
       height: 100%;
       overflow: hidden;
+      scroll-behavior: smooth;
     }
     header {
       position: fixed; top: 0; left: 0; right: 0;
@@ -41,14 +45,22 @@
       background: var(--ios-bg);
       padding: 1rem; box-sizing: border-box;
     }
-    section { display: none; }
-    section.active { display: block; }
+  section { display: none; }
+  section.active { display: block; }
+  section.section-enter { animation: sectionFadeUp 0.5s cubic-bezier(0.22,0.61,0.36,1); }
+
+  @keyframes sectionFadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 
     .ios-card {
       background: white; border-radius: 16px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.05);
       padding: 1rem; margin: 1rem 0;
+      transition: transform 0.35s cubic-bezier(0.4,0,0.2,1), box-shadow 0.35s cubic-bezier(0.4,0,0.2,1);
     }
+    .ios-card:hover { transform: translateY(-2px); box-shadow: 0 14px 28px rgba(0,0,0,0.09); }
     .ios-list {
       background: white; border-radius: 12px;
       overflow: hidden; border: 1px solid var(--ios-border);
@@ -57,14 +69,28 @@
       padding: 1rem; border-bottom: 1px solid var(--ios-border);
       display: flex; justify-content: space-between; align-items: center;
       font-size: 1rem;
+      transition: background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    .ios-list-item:hover { background: rgba(0,0,0,0.02); }
+    .ios-list-item:active { transform: scale(0.997); }
+    .animate-list-item {
+      opacity: 0; transform: translateY(14px);
+      animation: listItemFloat 0.45s cubic-bezier(0.22,0.61,0.36,1) forwards;
+      animation-delay: calc(var(--stagger-index, 0) * 60ms);
+    }
+    @keyframes listItemFloat {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
     }
     .ios-list-item:last-child { border-bottom: none; }
     .ios-button {
       background: var(--ios-blue); color: white; border: none;
       border-radius: 12px; font-size: 1rem; padding: 0.7rem 1.5rem;
-      font-weight: 500; cursor: pointer; transition: opacity 0.2s;
+      font-weight: 500; cursor: pointer; transition: opacity 0.2s, transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.08);
     }
-    .ios-button:active { opacity: 0.6; }
+  .ios-button:hover { transform: translateY(-1px); box-shadow: 0 12px 18px rgba(0,0,0,0.12); }
+    .ios-button:active { opacity: 0.7; transform: scale(0.97); }
     .ios-button.danger { background: #ff3b30; }
     .ios-input {
       border: 1px solid var(--ios-border);
@@ -77,27 +103,38 @@
     .ios-switch input { opacity: 0; width: 0; height: 0; }
     .slider {
       position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-      background-color: #ccc; border-radius: 34px; transition: .3s;
+      background-color: #ccc; border-radius: 34px; transition: background 0.25s ease;
     }
     .slider:before {
       position: absolute; content: "";
       height: 22px; width: 22px; left: 3px; bottom: 3px;
-      background-color: white; border-radius: 50%; transition: .3s;
+      background-color: white; border-radius: 50%; transition: transform 0.25s ease;
     }
     .ios-switch input:checked + .slider { background-color: var(--ios-blue); }
     .ios-switch input:checked + .slider:before { transform: translateX(22px); }
     .ios-alert {
       position: fixed; top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
+      transform: translate(-50%, -50%) scale(0.94);
       background: white; border-radius: 14px; padding: 1.2rem;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      text-align: center; display: none; width: 80%; max-width: 320px;
+      box-shadow: 0 18px 32px rgba(0,0,0,0.25);
+      text-align: center; width: 80%; max-width: 320px;
+      opacity: 0; visibility: hidden; pointer-events: none;
+      transition: opacity 0.35s cubic-bezier(0.4,0,0.2,1), transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .ios-alert.visible {
+      opacity: 1; visibility: visible; pointer-events: auto;
+      transform: translate(-50%, -50%) scale(1);
+    }
+    .ios-alert.closing {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.9);
+      pointer-events: none;
     }
     /* Dark mode for alerts/modals */
     html.dark .ios-alert { background: #111315; color: #e5e7eb; border: 1px solid var(--ios-border); }
 
     /* Scrollable tweak edit modal cleanup */
-    #tweakModal { max-height: 80vh; width: 92vw; max-width: 420px; display: none; padding: 0; overflow: hidden; }
+  #tweakModal { max-height: 80vh; width: 92vw; max-width: 420px; padding: 0; overflow: hidden; }
     #tweakModal h3 { margin: 1rem 1rem 0.25rem 1rem; }
     #tweakModalBody { text-align: left; margin: 0; padding: 0 1rem 0.5rem 1rem; max-height: 58vh; overflow-y: auto; }
     #tweakModal .modal-actions { display:flex; gap:.5rem; margin: .75rem 1rem 1rem; justify-content:center; flex-wrap:wrap; }
@@ -117,19 +154,46 @@
       position: fixed; bottom: 0; left: 0; right: 0;
       display: flex; border-top: 1px solid var(--ios-border);
       background: white; height: 60px; z-index: 10;
+      backdrop-filter: blur(12px);
     }
     .tab {
       flex: 1; display: flex; flex-direction: column;
       align-items: center; justify-content: center;
       color: var(--ios-text-gray); font-size: 0.7rem; cursor: pointer;
       user-select: none;
+      position: relative;
+      transition: color 0.3s ease;
     }
+    .tab:active { transform: scale(0.96); }
 
     /* Add consistent gap between icon and label and allow top alignment when tabs are tall */
     .tab { gap: 6px; }
     .tabs.tall .tab { justify-content: flex-start; padding-top: 8px; }
-    .tab.active { color: var(--ios-blue); }
+  .tab.active { color: var(--ios-blue); }
   svg { width: 22px; height: 22px; margin-bottom: 2px; }
+
+      /* App enter animations (cards, sections) */
+      body.ready .ios-card {
+        animation: cardPop 0.55s cubic-bezier(0.34,1.56,0.64,1) both;
+        animation-delay: calc(var(--card-index, 0) * 80ms);
+      }
+      @keyframes cardPop {
+        0% { opacity: 0; transform: translateY(22px) scale(0.98); }
+        60% { opacity: 1; transform: translateY(-2px) scale(1.01); }
+        100% { opacity: 1; transform: translateY(0) scale(1); }
+      }
+      body.reduced-motion .ios-card {
+        animation: none !important;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+          animation-duration: 0.001ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.001ms !important;
+        }
+        html, body { scroll-behavior: auto; }
+      }
 
     /* Tweak list layout stability */
     .tweak-left {
@@ -179,7 +243,7 @@
   <header style="display:flex; align-items:center; justify-content:space-between; padding:0 1rem;">
     <div style="display:flex; align-items:center; gap:.5rem;">
       <span style="font-weight:600; font-size:1.2rem;">WormJB</span>
-  <span id="appVersion" class="version-pill">v0.0.13</span>
+  <span id="appVersion" class="version-pill">—</span>
     </div>
     <div id="headerProfileWrap" style="display:flex; align-items:center; gap:.5rem;">
   <span id="headerUsername" style="color: var(--ios-text-gray); font-size:0.95rem;">WormJB User</span>
@@ -252,7 +316,7 @@
       </div>
 
       <!-- Tweak edit modal (dev only) -->
-      <div id="tweakModal" class="ios-alert" style="display:none;">
+  <div id="tweakModal" class="ios-alert">
         <h3>Edit Tweak</h3>
         <div id="tweakModalBody" style="text-align:left; margin-top:.5rem;">
           <label>Name</label>
@@ -280,7 +344,7 @@
         <div class="modal-actions" style="display:flex; gap:.5rem; margin-top: .75rem; justify-content:center; flex-wrap:wrap;">
           <button class="ios-button" id="saveTweakBtn">Save</button>
           <button class="ios-button danger" id="deleteTweakBtn">Delete</button>
-          <button class="ios-button" onclick="hideAlert()">Cancel</button>
+          <button class="ios-button" onclick="closeTweakModal()">Cancel</button>
         </div>
       </div>
     </section>
@@ -317,7 +381,7 @@
     </section>
 
     <!-- Add Repo Modal -->
-    <div id="addRepoModal" class="ios-alert" style="display:none; max-width:420px; width:92vw;">
+  <div id="addRepoModal" class="ios-alert" style="max-width:420px; width:92vw;">
       <h3>Add Repo</h3>
       <div style="text-align:left; margin-top:.5rem;">
         <label>Name</label>
@@ -459,7 +523,7 @@
           <div><strong>Developer:</strong> wheatbread2056</div>
           <div><strong>Inspiration:</strong> cydia gold edition team</div>
           <div><strong>License:</strong> No license because nobody needs licenses.</div>
-          <div><strong>App Version:</strong> v0.5.3</div>
+          <div><strong>App Version:</strong> <span id="creditsVersion">—</span></div>
         </div>
       </div>
     </section>
@@ -521,9 +585,54 @@
   </nav>
 
   <script>
-    const tabs = document.querySelectorAll('.tab');
-    const sections = document.querySelectorAll('section');
-    const tabBar = document.getElementById('tab-bar');
+  const tabs = document.querySelectorAll('.tab');
+  const sections = document.querySelectorAll('section');
+  const tabBar = document.getElementById('tab-bar');
+  const prefersReducedMotion = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+
+  function syncAppVersion() {
+    const version = (typeof APP_VERSION !== 'undefined' && APP_VERSION) ? APP_VERSION : '—';
+    const pill = document.getElementById('appVersion');
+    const credits = document.getElementById('creditsVersion');
+    if (pill) pill.textContent = version;
+    if (credits) credits.textContent = version;
+  }
+
+  syncAppVersion();
+
+    window.addEventListener('load', () => document.body.classList.add('ready'));
+    if (prefersReducedMotion) {
+      document.body.classList.toggle('reduced-motion', prefersReducedMotion.matches);
+      prefersReducedMotion.addEventListener('change', () => {
+        document.body.classList.toggle('reduced-motion', prefersReducedMotion.matches);
+        try { renderTweaks(); } catch(e) {}
+        try { renderReposList(); if (currentRepoId) renderRepoItems(); } catch(e) {}
+      });
+    }
+
+    function shouldReduceMotion() {
+      return !!(prefersReducedMotion && prefersReducedMotion.matches);
+    }
+
+    function playSectionEnter(section) {
+      if (!section || shouldReduceMotion()) return;
+      section.classList.remove('section-enter');
+      // force reflow so animation can retrigger
+      void section.offsetWidth;
+      section.classList.add('section-enter');
+    }
+
+    function prepareAnimatedListItem(el, index) {
+      if (!el) return;
+      el.style.setProperty('--stagger-index', index || 0);
+      if (shouldReduceMotion()) {
+        el.classList.remove('animate-list-item');
+        return;
+      }
+      el.classList.remove('animate-list-item');
+      void el.offsetWidth;
+      el.classList.add('animate-list-item');
+    }
 
     function switchTab(target) {
       // Use fresh queries so dynamically added tabs (Dev) are handled
@@ -532,18 +641,53 @@
       if (tab) tab.classList.add('active');
       document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
       const section = document.getElementById(target);
-      if (section) section.classList.add('active');
+      if (section) {
+        section.classList.add('active');
+        playSectionEnter(section);
+      }
     }
 
     tabs.forEach(tab => tab.addEventListener('click', () => switchTab(tab.dataset.tab)));
 
+    function showModal(el) {
+      if (!el) return;
+      el.classList.remove('closing');
+      // force reflow so reopening after a close anim replays entrance
+      void el.offsetWidth;
+      el.classList.add('visible');
+    }
+
+    function hideModal(el) {
+      if (!el) return;
+      const finish = () => {
+        el.classList.remove('visible');
+        el.classList.remove('closing');
+        el.removeEventListener('transitionend', onEnd);
+      };
+      const onEnd = (evt) => {
+        if (evt && evt.target !== el) return;
+        finish();
+      };
+      el.classList.add('closing');
+      const duration = parseFloat(getComputedStyle(el).transitionDuration) || 0;
+      const delay = parseFloat(getComputedStyle(el).transitionDelay) || 0;
+      const total = (duration + delay) * 1000;
+      if (total === 0) {
+        finish();
+        return;
+      }
+      el.addEventListener('transitionend', onEnd);
+      // Safety timeout in case transitionend doesn't fire
+      setTimeout(finish, total + 50);
+    }
+
     function showAlert(msg) {
       const alertBox = document.getElementById('alert');
       document.getElementById('alert-text').textContent = msg;
-      alertBox.style.display = 'block';
+      showModal(alertBox);
     }
     function hideAlert() {
-      document.getElementById('alert').style.display = 'none';
+      hideModal(document.getElementById('alert'));
     }
 
     function promptDebugCode() {
@@ -718,6 +862,7 @@
 
         item.appendChild(left);
         item.appendChild(right);
+        prepareAnimatedListItem(item, idx);
         container.appendChild(item);
       });
     }
@@ -744,12 +889,17 @@
       document.getElementById('tweakEnablePrompt').value = t.enableConfirmationPrompt || '';
       document.getElementById('tweakDisablePrompt').value = t.disableConfirmationPrompt || '';
       const modal = document.getElementById('tweakModal');
-      modal.style.display = 'block';
+      showModal(modal);
+    }
+
+    function closeTweakModal() {
+      hideModal(document.getElementById('tweakModal'));
+      currentEditIndex = null;
     }
 
     document.getElementById('saveTweakBtn').addEventListener('click', () => {
       const tweaks = loadTweaks();
-      if (currentEditIndex === null) return hideAlert();
+      if (currentEditIndex === null) { closeTweakModal(); return; }
       tweaks[currentEditIndex] = {
         id: document.getElementById('tweakId').value,
         name: document.getElementById('tweakName').value,
@@ -764,29 +914,19 @@
         disableConfirmationPrompt: document.getElementById('tweakDisablePrompt').value
       };
       saveTweaks(tweaks);
-      hideAlert();
+      closeTweakModal();
       renderTweaks();
     });
 
     const deleteBtn = document.getElementById('deleteTweakBtn');
     if (deleteBtn) deleteBtn.addEventListener('click', () => {
       const tweaks = loadTweaks();
-      if (currentEditIndex === null) return hideAlert();
+      if (currentEditIndex === null) { closeTweakModal(); return; }
       tweaks.splice(currentEditIndex, 1);
       saveTweaks(tweaks);
-      currentEditIndex = null;
-      hideAlert();
+      closeTweakModal();
       renderTweaks();
     });
-
-    // Override hideAlert to hide modal too
-    const originalHide = hideAlert;
-    function hideAlert() {
-      const modal = document.getElementById('tweakModal');
-      if (modal) modal.style.display = 'none';
-      const alertBox = document.getElementById('alert');
-      if (alertBox) alertBox.style.display = 'none';
-    }
 
   // Show alert remains same but ensure modal can be reused
   // render initially
@@ -1370,7 +1510,7 @@
       if (!reposListEl) return;
       reposListEl.innerHTML = '';
       const repos = getAllRepos();
-      repos.forEach(repo => {
+      repos.forEach((repo, idx) => {
         const row = document.createElement('div');
         row.className = 'ios-list-item';
         row.style.display = 'flex';
@@ -1410,6 +1550,7 @@
           actions.appendChild(delBtn);
         }
         row.appendChild(actions);
+        prepareAnimatedListItem(row, idx);
         reposListEl.appendChild(row);
       });
     }
@@ -1460,7 +1601,7 @@
         });
         return;
       }
-      items.forEach(t => {
+      items.forEach((t, idx) => {
         const row = document.createElement('div');
         row.className = 'ios-list-item';
         row.style.alignItems = 'center';
@@ -1489,6 +1630,7 @@
         right.appendChild(installBtn);
         row.appendChild(left);
         row.appendChild(right);
+        prepareAnimatedListItem(row, idx);
         repoItemsListEl.appendChild(row);
       });
     }
@@ -1508,8 +1650,8 @@
     const addRepoModal = document.getElementById('addRepoModal');
     const confirmAddRepoBtn = document.getElementById('confirmAddRepoBtn');
     const cancelAddRepoBtn = document.getElementById('cancelAddRepoBtn');
-    function showAddRepoModal(){ if (addRepoModal) addRepoModal.style.display='block'; }
-    function hideAddRepoModal(){ if (addRepoModal) addRepoModal.style.display='none'; }
+  function showAddRepoModal(){ if (addRepoModal) showModal(addRepoModal); }
+  function hideAddRepoModal(){ if (addRepoModal) hideModal(addRepoModal); }
     if (addRepoBtn) addRepoBtn.addEventListener('click', showAddRepoModal);
     if (cancelAddRepoBtn) cancelAddRepoBtn.addEventListener('click', hideAddRepoModal);
     if (confirmAddRepoBtn) confirmAddRepoBtn.addEventListener('click', async ()=>{
