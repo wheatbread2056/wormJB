@@ -1151,7 +1151,8 @@
       if (!tabBarEl || !mainEl) return;
       if (enabled) {
         tabBarEl.classList.add('tall');
-        mainEl.style.bottom = '90px';
+        // Match main bottom padding exactly to tall tab bar height to avoid white gap overlap
+        mainEl.style.bottom = '80px';
       } else {
         tabBarEl.classList.remove('tall');
         mainEl.style.bottom = '60px';
