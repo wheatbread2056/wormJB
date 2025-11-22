@@ -286,15 +286,53 @@
     </section>
 
     <!-- Tweak Browser page -->
-    <section id="tweakBrowser">
+    <!-- Repos list page -->
+  <section id="tweakBrowser">
       <div class="ios-card">
-        <h3>Tweak Browser</h3>
-        <div class="ios-list" id="repoList" style="padding:0;"></div>
-        <div style="display:flex; justify-content:center; gap:.5rem; margin-top:.75rem;">
+        <h3>Repos</h3>
+        <div class="ios-list" id="reposList" style="padding:0;"></div>
+        <div style="display:flex; justify-content:center; gap:.5rem; margin-top:.75rem; flex-wrap:wrap;">
+          <button class="ios-button" id="addRepoBtn">Add Repo</button>
           <button class="ios-button" id="backFromBrowserBtn">Back</button>
         </div>
       </div>
     </section>
+
+    <!-- Repo items view -->
+  <section id="repoItems">
+      <div class="ios-card">
+        <h3 id="repoTitle">Repo</h3>
+        <div class="ios-list" style="padding:0;">
+          <div class="ios-list-item" style="display:flex; gap:.5rem; flex-wrap:wrap;">
+            <button class="ios-button" id="repoFilterAll" style="padding:.4rem .9rem;">All</button>
+            <button class="ios-button" id="repoFilterTweaks" style="padding:.4rem .9rem;">Tweaks</button>
+            <button class="ios-button" id="repoFilterApps" style="padding:.4rem .9rem;">Apps</button>
+          </div>
+        </div>
+        <div class="ios-list" id="repoItemsList" style="padding:0; margin-top:.5rem;"></div>
+        <div style="display:flex; justify-content:center; gap:.5rem; margin-top:.75rem; flex-wrap:wrap;">
+          <button class="ios-button" id="backToReposBtn">Repos</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Add Repo Modal -->
+    <div id="addRepoModal" class="ios-alert" style="display:none; max-width:420px; width:92vw;">
+      <h3>Add Repo</h3>
+      <div style="text-align:left; margin-top:.5rem;">
+        <label>Name</label>
+        <input id="newRepoName" class="ios-input" placeholder="My Repo" />
+        <label>JSON URL (optional)</label>
+        <input id="newRepoUrl" class="ios-input" placeholder="https://example.com/repo.json" />
+        <label>Or Paste JSON (array of items)</label>
+        <textarea id="newRepoJson" class="ios-input" style="min-height:90px" placeholder='[{"type":"tweak","name":"Foo","desc":"...","ver":"1.0","date":"2025-01-01","author":"me","bg":"#fff"}]'></textarea>
+        <small style="color:var(--ios-text-gray); display:block; margin-top:.5rem;">Each item needs: type (tweak|app), name, desc, ver, date (YYYY-MM-DD), author, bg (color). URL fetch overrides pasted JSON if provided.</small>
+      </div>
+      <div style="display:flex; gap:.5rem; margin-top:.75rem; flex-wrap:wrap; justify-content:center;">
+        <button class="ios-button" id="confirmAddRepoBtn">Add</button>
+        <button class="ios-button" id="cancelAddRepoBtn">Cancel</button>
+      </div>
+    </div>
 
     <!-- Profile page (hidden until opened) -->
     <section id="profile">
@@ -452,6 +490,7 @@
           <button class="ios-button" id="exportDataBtn">Export Data (.wormdata)</button>
           <input id="importDataInput" type="file" accept=".wormdata,application/json" style="display:none;" />
           <button class="ios-button" id="importDataBtn">Import Data (.wormdata)</button>
+          <button class="ios-button" id="openConsoleBtn">Open JS Console</button>
         </div>
       </div>
     </section>
@@ -927,46 +966,10 @@
       bg: it.bg
     }));
 
-    const repoList = document.getElementById('repoList');
-    function renderRepo() {
-      if (!repoList) return;
-      repoList.innerHTML = '';
-      DEFAULT_REPO.forEach((t) => {
-        const row = document.createElement('div');
-        row.className = 'ios-list-item';
-        row.style.alignItems = 'center';
-        row.style.justifyContent = 'space-between';
-        row.style.background = resolveTweakBg(t.bg || 'white');
-        const left = document.createElement('div');
-        left.className = 'tweak-left';
-        left.innerHTML = `
-          <div class="tweak-title-row"><strong class="tweak-name">${escapeHtml(t.name)}</strong><small class="tweak-id">${escapeHtml(t.id)}</small></div>
-          <div class="tweak-desc">${escapeHtml(t.description)}</div>
-          <div class="tweak-meta">By ${escapeHtml(t.author)} • v${escapeHtml(t.version)} • ${escapeHtml(t.date)}</div>
-        `;
-        const right = document.createElement('div');
-        right.className = 'tweak-right';
-        const installBtn = document.createElement('button');
-        installBtn.className = 'ios-button';
-        installBtn.textContent = 'Install';
-        installBtn.addEventListener('click', () => {
-          const tweaks = loadTweaks();
-          // prevent duplicate by id
-          if (tweaks.some(x=>x.id===t.id)) { showAlert('Already installed'); return; }
-          tweaks.unshift({ ...t, enabled: false });
-          saveTweaks(tweaks);
-          showAlert('Installed '+t.name);
-          renderTweaks();
-        });
-        right.appendChild(installBtn);
-        row.appendChild(left);
-        row.appendChild(right);
-        repoList.appendChild(row);
-      });
-    }
+    // (Old single-repo renderer removed; multi-repo system defined later)
 
     const browserBtn = document.getElementById('browserBtn');
-    if (browserBtn) browserBtn.addEventListener('click', () => { renderRepo(); switchTab('tweakBrowser'); });
+    if (browserBtn) browserBtn.addEventListener('click', () => { renderReposList(); switchTab('tweakBrowser'); });
     const backFromBrowserBtn = document.getElementById('backFromBrowserBtn');
     if (backFromBrowserBtn) backFromBrowserBtn.addEventListener('click', () => switchTab('tweaks'));
 
@@ -1068,6 +1071,12 @@
       if (fontChoice === 'inter') { ensureInterLoaded(); document.documentElement.classList.add('force-apple-font'); document.documentElement.style.fontFamily = ''; }
       else if (fontChoice === 'other') { document.documentElement.classList.remove('force-apple-font'); document.documentElement.style.fontFamily = fontOther || ''; }
       else { document.documentElement.classList.remove('force-apple-font'); document.documentElement.style.fontFamily = ''; }
+      // Dev override: Force Apple Font toggle should always win regardless of theme font choice
+      if (localStorage.getItem('forceAppleFont') === 'true') {
+        ensureInterLoaded();
+        document.documentElement.classList.add('force-apple-font');
+        document.documentElement.style.fontFamily = ''; // rely on class
+      }
       // reflect selects
       const sel = document.getElementById('themeModeSelect');
       if (sel) sel.value = mode;
@@ -1075,7 +1084,7 @@
       if (color && customBg) color.value = customBg;
       // Re-render lists that depend on theme (for per-item bg transforms)
       try { renderTweaks(); } catch(e) {}
-      try { renderRepo(); } catch(e) {}
+  try { renderReposList(); if (currentRepoId) renderRepoItems(); } catch(e) {}
       // Music disabled state
       const musicDisabled = localStorage.getItem(MUSIC_DISABLED_KEY) === 'true';
       const audioBtn = document.getElementById('audioToggleBtn');
@@ -1243,6 +1252,7 @@
       }
     }
 
+    // Home buttons wiring restored
     function wireButtons() {
       const removeBtn = document.getElementById('removeJBBtn');
       const sideStoreBtn = document.getElementById('installSideStoreBtn');
@@ -1250,39 +1260,304 @@
       const showScriptBtn = document.getElementById('showScriptBtn');
       const openTermBtn = document.getElementById('openTerminalBtn');
       const mysteryBtn = document.getElementById('mysteryBtn');
-      if (removeBtn) removeBtn.addEventListener('click', () => {
-        showAlert("I apologize");
-      });
-      if (sideStoreBtn) sideStoreBtn.addEventListener('click', () => {
-        window.open('https://sidestore.io#get-started', '_blank');
-      });
-      if (repoBtn) repoBtn.addEventListener('click', () => {
-        window.open('https://github.com/wheatbread2056/wormJB', '_blank');
-      });
-      if (showScriptBtn) showScriptBtn.addEventListener('click', () => {
-        window.open('https://github.com/wheatbread2056/wormJB/blob/main/jb/main.sh', '_blank');
-      });
-      if (openTermBtn) openTermBtn.addEventListener('click', () => {
-        // Best-effort open A-Shell
-        window.location.href = 'ashell://';
-      });
-      if (mysteryBtn) mysteryBtn.addEventListener('click', () => {
-        showAlert('Absolutely nothing happened.');
-      });
+      if (removeBtn) removeBtn.addEventListener('click', () => { showAlert('I apologize'); });
+      if (sideStoreBtn) sideStoreBtn.addEventListener('click', () => { window.open('https://sidestore.io#get-started', '_blank'); });
+      if (repoBtn) repoBtn.addEventListener('click', () => { window.open('https://github.com/wheatbread2056/wormJB', '_blank'); });
+      if (showScriptBtn) showScriptBtn.addEventListener('click', () => { window.open('https://github.com/wheatbread2056/wormJB/blob/main/jb/main.sh', '_blank'); });
+      if (openTermBtn) openTermBtn.addEventListener('click', () => { window.location.href = 'ashell://'; });
+      if (mysteryBtn) mysteryBtn.addEventListener('click', () => { showAlert('Absolutely nothing happened.'); });
     }
     wireButtons();
 
-    // Device hash copy wiring
-    function getDeviceHash() {
-      let h = localStorage.getItem('wormjb_device_hash');
-      if (!h) {
-        // generate a 16-digit string with first digit 1-9
-        h = String(Math.floor(Math.random()*9)+1);
-        for (let i=0;i<15;i++) h += Math.floor(Math.random()*10);
-        localStorage.setItem('wormjb_device_hash', h);
-      }
-      return h;
+    // Multi-repo support (global scope)
+    const REPOS_KEY = 'wormjb_repos_v1';
+    let currentRepoId = null;
+    let currentRepoFilter = 'all'; // all|tweak|app
+
+    function loadRepos() {
+      try {
+        const raw = localStorage.getItem(REPOS_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        if (!Array.isArray(parsed)) return [];
+        return parsed;
+      } catch(e){ return []; }
     }
+    function saveRepos(repos){ localStorage.setItem(REPOS_KEY, JSON.stringify(repos)); }
+
+    function getDefaultLocalRepo() {
+      return {
+        id: 'local',
+        name: '(local) FAKE TWEAKS',
+        description: 'these are all FAKE. THESE DO NOTHING!!!',
+        icon: 'assets/wormjbicon.png',
+        bg: '#f7b2f0',
+        items: DEFAULT_REPO
+      };
+    }
+
+    function getAllRepos() {
+      const repos = loadRepos();
+      const hasLocal1 = repos.some(r=>r.id==='local');
+      const hasLocal2 = repos.some(r=>r.id==='local2');
+      const injected = [];
+      if (!hasLocal1) injected.push(getDefaultLocalRepo());
+      if (!hasLocal2) injected.push({
+        id: 'local2',
+        name: '(local) brainworm\'s repo',
+        description: 'actual "tweaks", they do stuff (50% vibecoded, 50% human-written)',
+        icon: 'assets/wormjbicon.png',
+        bg: '#f7b2f0',
+        items: [
+          {
+            id: 'tweak.brainworm.useragent',
+            name: 'useragent',
+            description: 'get user agent from the wormJB webapp',
+            author: 'brainworm',
+            version: '0.0.1',
+            date: '2025-11-15',
+            bg: '#f7b2f0',
+            type: 'tweak',
+            onEnable: `(() => {
+  const ua = navigator.userAgent || 'Unknown';
+  alert(ua);
+})()`
+          },
+          {
+            id: 'tweak.brainworm.ddg',
+            name: 'duckduckgo',
+            description: 'search duckduckgo from the wormJB webapp',
+            author: 'brainworm',
+            version: '0.0.1',
+            date: '2025-11-21',
+            bg: '#9fe8f2',
+            type: 'tweak',
+            onEnable: `(() => {
+            window.location.href = 'https://duckduckgo.com/';
+          })()`
+          },
+          {
+            id: 'tweak.brainworm.blockota',
+            name: 'block ota',
+            description: 'install nebula mobileconfig block ota',
+            author: 'brainworm',
+            version: '0.0.1',
+            date: '2025-11-21',
+            bg: '#b9f7b2',
+            type: 'tweak',
+            onEnable: `(() => {
+            window.location.href = 'https://f.itsnebula.net/noota-26.mobileconfig';
+          })()`
+          },
+          {
+            id: 'app.githubcopilot.console',
+            name: 'JS Console',
+            description: 'js console',
+            author: 'GitHub Copilot',
+            version: '1.0',
+            date: '2025-11-21',
+            bg: '#fef3c7',
+            type: 'app',
+            onEnable: `(() => { window.location.href = 'assets/console.html'; })()`
+          }
+        ]
+      });
+      return [...injected, ...repos];
+    }
+
+    const reposListEl = document.getElementById('reposList');
+    function renderReposList() {
+      if (!reposListEl) return;
+      reposListEl.innerHTML = '';
+      const repos = getAllRepos();
+      repos.forEach(repo => {
+        const row = document.createElement('div');
+        row.className = 'ios-list-item';
+        row.style.display = 'flex';
+        row.style.justifyContent = 'space-between';
+        row.style.alignItems = 'center';
+        row.style.background = resolveTweakBg(repo.bg || 'white');
+        const iconSrc = escapeHtml(repo.icon || 'assets/wormjbicon.png');
+        const desc = escapeHtml(repo.description || '');
+        row.innerHTML = `<div style="display:flex; align-items:center; gap:.6rem; min-width:0;">
+          <img src="${iconSrc}" alt="repo icon" style="width:28px; height:28px; border-radius:6px; flex:0 0 auto;" />
+          <div style="display:flex; flex-direction:column; min-width:0;">
+            <strong style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(repo.name)}</strong>
+            <small style="color:var(--ios-text-gray); white-space:normal; overflow:hidden; line-height:1.25; font-size:0.7rem;">${desc}</small>
+          </div>
+        </div>`;
+        const actions = document.createElement('div');
+        actions.style.display = 'flex';
+        actions.style.gap = '.5rem';
+        const openBtn = document.createElement('button');
+        openBtn.className = 'ios-button';
+        openBtn.textContent = 'Open';
+        openBtn.style.padding = '.4rem .7rem';
+        openBtn.addEventListener('click', ()=>{ openRepo(repo.id); });
+        actions.appendChild(openBtn);
+  if (!['local','local2'].includes(repo.id)) {
+          const delBtn = document.createElement('button');
+          delBtn.className = 'ios-button danger';
+          delBtn.textContent = 'Delete';
+          delBtn.style.padding = '.4rem .7rem';
+          delBtn.addEventListener('click', ()=>{
+            if (!confirm('Delete repo '+repo.name+'?')) return;
+            const rs = getAllRepos().filter(r=>r.id!==repo.id);
+            saveRepos(rs.filter(r=>!['local','local2'].includes(r.id)));
+            renderReposList();
+            showAlert('Repo deleted');
+          });
+          actions.appendChild(delBtn);
+        }
+        row.appendChild(actions);
+        reposListEl.appendChild(row);
+      });
+    }
+
+    function openRepo(id) {
+      const repos = getAllRepos();
+      const repo = repos.find(r=>r.id===id);
+      if (!repo) { showAlert('Repo not found'); return; }
+      currentRepoId = id;
+      currentRepoFilter = 'all';
+      switchTab('repoItems');
+      renderRepoItems();
+    }
+
+    function filteredItems(items) {
+      if (currentRepoFilter==='all') return items;
+      return items.filter(it => (currentRepoFilter==='tweak' ? it.id.startsWith('tweak.') || it.type==='tweak' : it.id.startsWith('app.') || it.type==='app'));
+    }
+
+    const repoTitleEl = document.getElementById('repoTitle');
+    const repoItemsListEl = document.getElementById('repoItemsList');
+    function renderRepoItems() {
+      if (!repoItemsListEl) return;
+      const repos = getAllRepos();
+      const repo = repos.find(r=>r.id===currentRepoId);
+      if (!repo) return;
+      if (repoTitleEl) {
+        const iconSrc = escapeHtml(repo.icon || 'assets/wormjbicon.png');
+        repoTitleEl.innerHTML = `<span id="repoTitleText" style="display:flex; align-items:center; gap:.5rem;"><img src="${iconSrc}" alt="repo icon" style="width:24px; height:24px; border-radius:6px;" /> ${escapeHtml(repo.name)}</span>`;
+        const origBg = repo.bg || '#ffffff';
+        let titleColor = origBg;
+        try { if (!isDarkMode()) { titleColor = invertBrightnessColor(origBg); } } catch(e) {}
+        const spanEl = document.getElementById('repoTitleText');
+        if (spanEl) spanEl.style.color = titleColor;
+      }
+      repoItemsListEl.innerHTML = '';
+      const items = filteredItems(repo.items || []);
+      // Placeholder categories for second local repo when empty
+      if (repo.id === 'local2' && (repo.items || []).length === 0) {
+        ['Tweaks','Apps','Other'].forEach(cat => {
+          const row = document.createElement('div');
+          row.className = 'ios-list-item';
+          row.style.display = 'flex';
+          row.style.justifyContent = 'space-between';
+          row.style.alignItems = 'center';
+          row.innerHTML = `<strong>${escapeHtml(cat)}</strong><span style="color:var(--ios-text-gray);">No items</span>`;
+          repoItemsListEl.appendChild(row);
+        });
+        return;
+      }
+      items.forEach(t => {
+        const row = document.createElement('div');
+        row.className = 'ios-list-item';
+        row.style.alignItems = 'center';
+        row.style.justifyContent = 'space-between';
+        row.style.background = resolveTweakBg(t.bg || 'white');
+        const left = document.createElement('div');
+        left.className = 'tweak-left';
+        left.innerHTML = `
+          <div class="tweak-title-row"><strong class="tweak-name">${escapeHtml(t.name)}</strong><small class="tweak-id">${escapeHtml(t.id)}</small></div>
+          <div class="tweak-desc">${escapeHtml(t.description)}</div>
+          <div class="tweak-meta">By ${escapeHtml(t.author)} • v${escapeHtml(t.version)} • ${escapeHtml(t.date)}</div>
+        `;
+        const right = document.createElement('div');
+        right.className = 'tweak-right';
+        const installBtn = document.createElement('button');
+        installBtn.className = 'ios-button';
+        installBtn.textContent = 'Install';
+        installBtn.addEventListener('click', () => {
+          const tweaks = loadTweaks();
+          if (tweaks.some(x=>x.id===t.id)) { showAlert('Already installed'); return; }
+          tweaks.unshift({ ...t, enabled: false });
+          saveTweaks(tweaks);
+          showAlert('Installed '+t.name);
+          renderTweaks();
+        });
+        right.appendChild(installBtn);
+        row.appendChild(left);
+        row.appendChild(right);
+        repoItemsListEl.appendChild(row);
+      });
+    }
+
+    const backToReposBtn = document.getElementById('backToReposBtn');
+    if (backToReposBtn) backToReposBtn.addEventListener('click', ()=>{ switchTab('tweakBrowser'); });
+
+    const repoFilterAll = document.getElementById('repoFilterAll');
+    const repoFilterTweaks = document.getElementById('repoFilterTweaks');
+    const repoFilterApps = document.getElementById('repoFilterApps');
+    if (repoFilterAll) repoFilterAll.addEventListener('click', ()=>{ currentRepoFilter='all'; renderRepoItems(); });
+    if (repoFilterTweaks) repoFilterTweaks.addEventListener('click', ()=>{ currentRepoFilter='tweak'; renderRepoItems(); });
+    if (repoFilterApps) repoFilterApps.addEventListener('click', ()=>{ currentRepoFilter='app'; renderRepoItems(); });
+
+    // Add Repo modal logic
+    const addRepoBtn = document.getElementById('addRepoBtn');
+    const addRepoModal = document.getElementById('addRepoModal');
+    const confirmAddRepoBtn = document.getElementById('confirmAddRepoBtn');
+    const cancelAddRepoBtn = document.getElementById('cancelAddRepoBtn');
+    function showAddRepoModal(){ if (addRepoModal) addRepoModal.style.display='block'; }
+    function hideAddRepoModal(){ if (addRepoModal) addRepoModal.style.display='none'; }
+    if (addRepoBtn) addRepoBtn.addEventListener('click', showAddRepoModal);
+    if (cancelAddRepoBtn) cancelAddRepoBtn.addEventListener('click', hideAddRepoModal);
+    if (confirmAddRepoBtn) confirmAddRepoBtn.addEventListener('click', async ()=>{
+      const name = (document.getElementById('newRepoName').value || '').trim();
+      const url = (document.getElementById('newRepoUrl').value || '').trim();
+      const jsonText = document.getElementById('newRepoJson').value.trim();
+      if (!name) { showAlert('Repo name required'); return; }
+      let items = [];
+      async function fetchUrl(u){
+        try {
+          const res = await fetch(u);
+          if (!res.ok) throw new Error('HTTP '+res.status);
+          return await res.json();
+        } catch(e){ throw e; }
+      }
+      try {
+        if (url) {
+          items = await fetchUrl(url);
+        } else if (jsonText) {
+          items = JSON.parse(jsonText);
+        } else {
+          showAlert('Provide URL or JSON'); return;
+        }
+        if (!Array.isArray(items)) { showAlert('JSON must be an array of items'); return; }
+        const normalized = items.map(it => {
+          const type = (it.type === 'app') ? 'app' : 'tweak';
+          const slug = slugifyName(it.name || 'item'+Date.now());
+          const id = `${type}.${slug}`;
+          return {
+            id,
+            name: it.name || slug,
+            description: it.desc || it.description || '',
+            author: it.author || 'unknown',
+            version: it.ver || it.version || '1.0.0',
+            date: it.date || new Date().toISOString().slice(0,10),
+            bg: it.bg || '#ffffff',
+            type
+          };
+        });
+        const repos = getAllRepos().filter(r=>r.id!=='local');
+        const repoId = slugifyName(name);
+        if (getAllRepos().some(r=>r.id===repoId)) { showAlert('Repo ID already exists'); return; }
+        repos.push({ id: repoId, name, items: normalized });
+        saveRepos(repos);
+        hideAddRepoModal();
+        renderReposList();
+        showAlert('Repo added');
+      } catch(e){ showAlert('Failed: '+(e && e.message ? e.message : e)); }
+    });
     (function setupCopyHash(){
       const btn = document.getElementById('copyHashBtn');
       if (!btn) return;
@@ -1468,6 +1743,12 @@
       if (!isDarkMode()) return bg;
       try { return invertBrightnessColor(bg); } catch (e) { return bg; }
     }
+    // -------- WormJB Mobile JavaScript Console (refactored external) --------
+    function openConsole() {
+      // Navigate to standalone console page for cleaner separation
+      window.location.href = 'assets/console.html';
+    }
+    (function(){ const btn=document.getElementById('openConsoleBtn'); if(btn) btn.addEventListener('click', openConsole); })();
   </script>
 </body>
 </html>
