@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>WormJB</title>
   <script>
-    const APP_VERSION = '1.0-rc5';
+    const APP_VERSION = '1.0-rc6';
   </script>
   <style>
     :root {
@@ -23,7 +23,7 @@
       --glass-border: rgba(255, 255, 255, 0.45);
       --glass-shadow: 0 24px 45px rgba(15, 23, 42, 0.18);
       --header-height: 56px;
-      --header-gap: 16px;
+  --header-gap: 0px;
     }
     html.dark {
       --glass-surface: rgba(15, 18, 24, 0.78);
@@ -31,7 +31,7 @@
       --glass-shadow: 0 28px 55px rgba(0, 0, 0, 0.65);
     }
     html.glass-mode {
-      --header-gap: 32px;
+      --header-gap: 0px;
     }
     /* Dark variables are applied via early bootstrap/applyTheme; avoid CSS overrides leaking into light mode */
     html, body {
@@ -64,7 +64,7 @@
       z-index: 9;
     }
     main {
-      position: absolute; top: calc(var(--header-height) + env(safe-area-inset-top, 0px) + var(--header-gap)); bottom: 60px; left: 0; right: 0;
+      position: absolute; top: calc(var(--header-height) + env(safe-area-inset-top, 0px)); bottom: 60px; left: 0; right: 0;
       overflow-y: auto; -webkit-overflow-scrolling: touch;
       background: var(--ios-bg);
       padding: 1rem; box-sizing: border-box;
@@ -405,20 +405,18 @@
                   var(--ios-bg);
     }
     html.glass-mode header {
-      top: calc(env(safe-area-inset-top, 0px) + 12px);
-      left: 50%;
-      right: auto;
-      width: calc(100% - 2rem);
-      max-width: 640px;
-      transform: translateX(-50%);
-      border-radius: 22px;
+      top: 0;
+      left: 0;
+      right: 0;
+      transform: none;
+      border-radius: 0;
       border: 1px solid var(--glass-border);
-      border-bottom: none;
+      border-bottom: 1px solid var(--glass-border);
       background: var(--glass-surface);
-      box-shadow: var(--glass-shadow);
+      box-shadow: none;
       height: auto;
       min-height: calc(var(--header-height) + 0px);
-      padding-top: calc(env(safe-area-inset-top, 0px) + 0.35rem);
+      padding-top: calc(env(safe-area-inset-top, 0px));
       padding-bottom: 0.35rem;
       backdrop-filter: saturate(160%) blur(22px);
       -webkit-backdrop-filter: saturate(160%) blur(22px);
